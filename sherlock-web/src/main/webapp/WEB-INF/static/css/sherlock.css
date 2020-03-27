@@ -1,0 +1,127 @@
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@charset "UTF-8";
+
+h1 {
+	padding: 0.5rem;
+}
+
+a.navbar-brand {
+	font-size: 3rem;
+	font-weight: 800;
+	color: #534949;
+}
+
+.navbar-nav {
+    list-style: none;
+}
+
+@media only screen and (min-width: 992px) {
+	.navbar-expand-lg .navbar-nav {
+		flex-direction: row;
+	}
+	#mainNav .navbar-toggler {
+		display: none;
+	}
+}
+
+
+#mainNav .navbar-nav > li.nav-item > a {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  text-decoration: none;
+}
+
+.navbar .container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+}
+
+.container:before, .container:after {
+	display: none;
+}
+
+.refresh {
+	text-align: center;
+	padding: 10px;
+	font-size: 25px;
+	background-color: #eeeeec;
+	display: none;
+}
+
+.refresh:hover {
+	text-align: center;
+	padding: 10px;
+	font-size: 25px;
+	background-color: #babdb6;
+	cursor: pointer;
+}
+
+#map {
+	width: 100%;
+	flex-grow: 1;
+}
+
+.clues {
+	font-weight: bold;
+}
+
+.middle-container {
+	margin-top: 50px;
+}
+
+.container {
+	max-width: 1600px;
+}
+
+img {
+	max-width: 100%;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+body {
+	font-size: 20px;
+	color: #212529;
+}
+
+p {
+	line-height: 1.5;
+	margin: 30px 0;
+}
+
+p a {
+	text-decoration: underline;
+}
+
+#mainNav .navbar-toggler {
+	font-size: 12px;
+	font-weight: 800;
+	padding: 13px;
+	text-transform: uppercase;
+	color: #343a40;
+	line-height: 1;
+	background-color: transparent;
+	border: 1px solid rgba(0, 0, 0, .1);;
+	border-radius: 5px;
+	display: hidden;
+}

@@ -1,0 +1,62 @@
+<!--
+  Copyright 2020 Google LLC
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Menu</title>
+
+<!-- Disable favicon requests -->
+<link rel="shortcut icon" type="image/x-icon" href="data:image/x-icon;,">
+
+<!-- Load Interactive Canvas JavaScript -->
+<script
+	src="https://www.gstatic.com/assistant/interactivecanvas/api/interactive_canvas.min.js"></script>
+<link rel="stylesheet" href="/static/canvas/canvas.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style type="text/css">
+html, body {
+	width: 100%;
+	height: 100%;
+}
+
+.menu-container {
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: center;
+	min-height: 70%;
+}
+</style>
+
+</head>
+<body>
+	<div class="debug">
+		<div class="logs" id="logs"></div>
+	</div>
+
+	<div class="container menu-container">
+		<h1 ondblclick="showDebug()" id="title">Title</h1>
+		<div class="menu-buttons" id="buttons"></div>
+	</div>
+	<script src="/static/canvas/canvas.js"></script>
+	<script src="/static/canvas/logs.js"></script>
+	<script src="/static/canvas/menu.js"></script>
+</body>
+</html>

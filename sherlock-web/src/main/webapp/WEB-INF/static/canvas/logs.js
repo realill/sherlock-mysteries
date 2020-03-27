@@ -1,0 +1,49 @@
+// Copyright 2020 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/**
+ * Copyright 2019 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const prepend = (level, line) => {
+  const p = document.createElement('p');
+  p.textContent = line;
+  p.className = level;
+  document.getElementById('logs').prepend(document.createElement('br'));
+  document.getElementById('logs').prepend(p);
+};
+
+const info = console.log.bind(console);
+console.log = (...messages) => {
+  prepend('log', messages.join(' '));
+  info(...messages);
+};
+
+const error = console.error.bind(console);
+console.error = (...messages) => {
+  prepend('error', messages.join(' '));
+  error(...messages);
+};

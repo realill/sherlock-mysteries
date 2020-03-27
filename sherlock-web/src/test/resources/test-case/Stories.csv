@@ -1,0 +1,13 @@
+ID/Address,Name,Text,Clues,Latlong
+caseStartPrestory,Prestory, Case prestory,
+gameIntroduction,Game Introduction,Welcome I am your guide through the game. Start the test case to start.,
+caseIntroduction,Test Case Introduction,You are welcomed into 221B Baker Street to start test case. You are tasked with going around London starting with [Scotland Yard],"map, newspaper","1,2"
+4 Whitehall Place,Scotland Yard,"We are got a cold welcome form inspector Lestrade at his cabinet. ""Sherlock Holmes asked me to give this portrait to you"", he handles us small Queen Victories portrait. ""Now please leave, I am very busy"".
+After examination of the portrait we find handwriten note on it ""Queen Victoria at Buckingham Palace"".",portrait
+221B Baker Street,Sherlock Holmes,"[Mrs. Hudson] tells us that [Sherlock Holmes] left the house, so we are getting back to our case.",
+Buckingham Palace,Buckingham Palace,"After spending some time at Buckingham Palace gates one thing is certain: Queen Victoria is not expecting us. 
+But we got approached by tall gentelmen. ""Hello, my name is William Smith. Have you read todays edition of The Times? You can find something intresting there in crime section"". Saying this William Smith disapears. ",
+101A Regent Street,Stephen Cook,We find [Stephen Cook] at home. He tells us that he was robbed right next to his house. This is all we can get out of him,
+timesArticle1,Entertainment,Do not miss Annie Hill performance at Grand Theatre on Monday,
+timesArticle2,Crime,"[Stephen Cook] was robbed on night of 3rd near his house, police is looking for witnesses",
+finalSolution,Sherlock Holmes House,The goal of this case was to guide you through game basics. This is final solution.,

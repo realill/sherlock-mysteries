@@ -1,0 +1,213 @@
+/*
+ * Copyright 2020 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@charset "UTF-8";
+
+@media ( min-width : 1000px) {
+	#htmlText {
+		font-size: 35px;
+	}
+	button {
+		font-size: 30px;
+	}
+}
+
+.spinner {
+	position: fixed;
+	right: 0.5em;
+	bottom: 0.5em;
+	border: 16px solid #475587;
+	border-radius: 50%;
+	border-top: 16px solid #f3f3f3;
+	width: 1.1em;
+	height: 1.1em;
+	-webkit-animation: spin 2s linear infinite; /* Safari */
+	animation: spin 2s linear infinite;
+	z-index: 10000;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.quick-menu {
+	position: fixed;
+	right: 0.5em;
+	top: 0.1em;
+	display: flex;
+	flex-direction: column;
+	z-index: 10000;
+}
+
+.quick-menu button {
+	background: rgba(255, 255, 255, 0.7);
+	color: black;
+	border-radius: 10rem;
+	border: 1px solid;
+	cursor: pointer;
+	font-weight: 700;
+	padding: 0.4rem;
+	text-align: center;
+	text-decoration: none;
+	white-space: nowrap;
+	color: black;
+}
+
+.qm-button {
+	display: none;
+}
+
+body {
+	margin: 0px;
+}
+
+button {
+	font-size: 1rem;
+}
+
+h2 {
+	margin-bottom: 0.5rem;
+}
+
+.top-container {
+	padding: 0;
+	margin: 0;
+}
+
+.float-element {
+	padding: 0px;
+	margin-right: 1em;
+	width: 100%;
+	max-width: 700px;
+	float: left;
+}
+
+.float-element * {
+	width: 100%;
+}
+
+.card-item {
+	border-bottom-right-radius: 2px;
+	border-top-right-radius: 2px;
+	border: 2px solid #e0e0e0;
+	border-left-width: 8px;
+	color: #424242;
+	margin: 10px 5px 0 0;
+	padding: 0.8rem;
+	max-width: 400px;
+	display: inline-block;
+}
+
+.card-item img {
+	width: 99%;
+}
+
+.card-item h2 {
+	margin: 1px
+}
+
+#map {
+	height: 100%;
+	width: 100%;
+}
+
+.leaflet-popup-content {
+	text-align: center;
+	margin: 9px 10px;
+	font-size: 1.2rem;
+}
+
+#map-footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	margin: 0 auto;
+	z-index: 1000;
+}
+
+.container {
+	margin: 0.6rem;
+	display: none;
+}
+
+.menu-container {
+	text-align: center;
+	padding: 4rem 0 0 0;
+}
+
+.menu-container button {
+	text-align: center;
+	width: 50%; /* Set a width if needed */
+	display: block; /* Make the buttons appear below each other */
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 1rem;
+}
+
+.hint {
+	margin-top: 1rem;
+}
+
+.debug {
+	display: none;
+}
+
+.bottom-buttons {
+	padding-top: 0.9rem;
+	padding-bottom: 0.9rem;
+	text-align: center;
+	width: 100%;
+	align-content: center;
+	width: 100%;
+}
+
+button, .button {
+	-moz-appearance: none;
+	-webkit-appearance: none;
+	-ms-appearance: none;
+	appearance: none;
+	-moz-transition: background-color 0.2s ease-in-out, color 0.2s
+		ease-in-out;
+	-webkit-transition: background-color 0.2s ease-in-out, color 0.2s
+		ease-in-out;
+	-ms-transition: background-color 0.2s ease-in-out, color 0.2s
+		ease-in-out;
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+	background-color: #e5e5e5;
+	color: black;
+	border-radius: 1rem;
+	border: 1px solid;
+	cursor: pointer;
+	display: inline-block;
+	font-weight: 700;
+	padding: 0.8rem 1.3rem 0.6rem;
+	text-align: center;
+	text-decoration: none;
+	white-space: nowrap;
+	color: black;
+	margin: 0.4rem;
+}
+
+button.active, .button.active {
+	background-color: #e7e7e7;
+	color: black;
+}
