@@ -58,14 +58,10 @@ import com.google.mystery.web.model.CaseLogEntry;
 
 @Controller
 public class PublicController {
-  @Inject
-  private SessionManager sessionManager;
-  @Inject
-  private AssetsManager assetsManager;
-  @Inject
-  private MessagesManager messangesManager;
-  @Inject
-  private SherlockConfig config;
+  @Inject private SessionManager sessionManager;
+  @Inject private AssetsManager assetsManager;
+  @Inject private MessagesManager messangesManager;
+  @Inject private SherlockConfig config;
 
   private Logger logger = Logger.getLogger(this.getClass().getName());
 
@@ -85,6 +81,13 @@ public class PublicController {
     }
   }
 
+  @GetMapping("/google87ec9b3670740f8f.html")
+  protected ResponseEntity<String> googleverification() throws ServletException, IOException {
+
+    return new ResponseEntity<String>(
+        "google-site-verification: google87ec9b3670740f8f.html", HttpStatus.OK);
+  }
+
   @GetMapping("/session/{sessionid}/howtoplay")
   protected String howtoplay(@PathVariable String sessionid, Model model)
       throws ServletException, IOException {
@@ -94,7 +97,8 @@ public class PublicController {
   }
 
   @GetMapping("/session/{sessionid}/checkrefresh")
-  protected ResponseEntity<String> checkRefresh(@PathVariable String sessionid,
+  protected ResponseEntity<String> checkRefresh(
+      @PathVariable String sessionid,
       @RequestParam(defaultValue = "time", required = true) String time) {
     try {
       long timeLong = Long.parseLong(time);
@@ -104,14 +108,14 @@ public class PublicController {
         return new ResponseEntity<String>("{\"refresh\":false}", HttpStatus.OK);
       }
     } catch (NumberFormatException e) {
-      return new ResponseEntity<String>("{\"error\":\"wrong time format\"}",
-          HttpStatus.BAD_REQUEST);
+      return new ResponseEntity<String>(
+          "{\"error\":\"wrong time format\"}", HttpStatus.BAD_REQUEST);
     }
   }
 
   @GetMapping("/session/{sessionid}/map")
-  protected String map(@PathVariable String sessionid,
-      @RequestParam(defaultValue = "view") String mode, Model model)
+  protected String map(
+      @PathVariable String sessionid, @RequestParam(defaultValue = "view") String mode, Model model)
       throws ServletException, IOException {
     List<Story> stories = ImmutableList.of();
     Session session = sessionManager.getDBSession(sessionid);
@@ -200,15 +204,20 @@ public class PublicController {
         if (caseDataId != null) {
           List<SessionLog> sessionLogs = sessionManager.sessionLogs(sessionid);
           List<CaseLogEntry> logs = new ArrayList<>();
-          for (ListIterator<SessionLog> i = sessionLogs.listIterator(sessionLogs.size()); i
-              .hasPrevious();) {
+          for (ListIterator<SessionLog> i = sessionLogs.listIterator(sessionLogs.size());
+              i.hasPrevious(); ) {
             SessionLog sessionLog = i.previous();
             if (SessionLog.THANK_YOU.equals(sessionLog.getStoryid())) {
-              logs.add(new CaseLogEntry(sessionLog.getSessionid(), "Finish",
-                  "Thank you for playing", messangesManager.message("thankYou"),
-                  new URL(
-                      "https://storage.googleapis.com/mystery-engine-voices/images/sherlock.png"),
-                  null, ImmutableList.of()));
+              logs.add(
+                  new CaseLogEntry(
+                      sessionLog.getSessionid(),
+                      "Finish",
+                      "Thank you for playing",
+                      messangesManager.message("thankYou"),
+                      new URL(
+                          "https://storage.googleapis.com/mystery-engine-voices/images/sherlock.png"),
+                      null,
+                      ImmutableList.of()));
             }
             Story story = assetsManager.getStory(caseDataId, sessionLog.getStoryid());
             if (story == null) {
@@ -234,10 +243,15 @@ public class PublicController {
               title = "final solution";
             }
 
-            logs.add(new CaseLogEntry(SearchManager.normalize(story.getId()), story.getTitle(),
-                title, SherlockResponse.textToHtml(story.getText()), story.getImageUrl(),
-                hint == null || Strings.isNullOrEmpty(hint.getHint()) ? null : hint.getHint(),
-                clues));
+            logs.add(
+                new CaseLogEntry(
+                    SearchManager.normalize(story.getId()),
+                    story.getTitle(),
+                    title,
+                    SherlockResponse.textToHtml(story.getText()),
+                    story.getImageUrl(),
+                    hint == null || Strings.isNullOrEmpty(hint.getHint()) ? null : hint.getHint(),
+                    clues));
           }
           model.addAttribute("logs", logs);
           return freemarker(model, "case-files");
