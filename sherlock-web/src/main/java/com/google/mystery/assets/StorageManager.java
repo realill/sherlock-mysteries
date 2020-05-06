@@ -128,7 +128,7 @@ public class StorageManager {
    * Making blob public
    */
   protected void makePublic(Storage storage, Blob blob) {
-    if (blob != null && !blob.getAcl().contains(PUBLIC_ACL)) {
+    if (blob != null && blob.getAcl() != null && !blob.getAcl().contains(PUBLIC_ACL)) {
       storage.createAcl(blob.getBlobId(), PUBLIC_ACL);
     }
   }
