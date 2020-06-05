@@ -44,7 +44,7 @@ public class Case implements Serializable {
   private final String caseDataId;
   /** name of the case. */
   private final String name;
-  /** alternative names that can be used to find thid case. */
+  /** alternative names that can be used to find this case. */
   private final List<String> alternativeNames;
   /** Category to characterize this case. */
   private final String category;

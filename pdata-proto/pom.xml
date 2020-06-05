@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<parent>
+		<groupId>com.google.mystery</groupId>
+		<artifactId>root</artifactId>
+		<version>0.1-SNAPSHOT</version>
+	</parent>
+
+	<properties>
+		<proto.version>3.12.2</proto.version>
+	</properties>
+
+	<modelVersion>4.0.0</modelVersion>
+	<version>0.9</version>
+
+	<artifactId>pdata-proto</artifactId>
+
+	<dependencies>
+		<!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.11.4</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.github.os72</groupId>
+				<artifactId>protoc-jar-maven-plugin</artifactId>
+				<version>3.11.4</version>
+				<executions>
+					<execution>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<protocVersion>3.11.4</protocVersion>
+							<inputDirectories>
+								<include>src/main/resources</include>
+							</inputDirectories>
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<outputTargets>
+						<outputTarget>
+							<type>java</type>
+							<!-- explicitly specify artifact to force download via maven. -->
+							<pluginArtifact>com.google.protobuf:protoc:3.11.4</pluginArtifact>
+							<!-- compile against the 'lite' runtime. Former option from the proto 
+								file. -->
+							<outputOptions>lite</outputOptions>
+							<!-- include sources in target jar file. -->
+							<addSources>main</addSources>
+						</outputTarget>
+					</outputTargets>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

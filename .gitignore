@@ -7,3 +7,6 @@ sherlock-web/.settings/*
 sherlock-data/.classpath
 sherlock-data/.project
 sherlock-data/.settings/*
+pdata-proto/.classpath
+pdata-proto/.project
+pdata-proto/.settings/*

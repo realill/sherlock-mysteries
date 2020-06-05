@@ -31,6 +31,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
   <modules>
     <module>sherlock-data</module>
     <module>sherlock-web</module>
+    <module>pdata-proto</module>
   </modules>
   <build>
    <pluginManagement>

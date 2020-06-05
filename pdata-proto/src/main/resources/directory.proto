@@ -1,0 +1,14 @@
+syntax = "proto3";
+package com.sherlockmysteries.pdata;
+
+message DirectoryEntryData {
+	string name = 1;
+	string location = 2;
+	repeated string keywords = 3;
+}
+
+message DirectoryCategoryData {
+	string name = 1;
+	repeated string keywords = 2;
+	repeated DirectoryEntryData entries = 3;
+}

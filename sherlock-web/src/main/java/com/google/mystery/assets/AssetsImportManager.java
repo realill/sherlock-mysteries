@@ -30,8 +30,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
 import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Joiner;
@@ -58,22 +60,14 @@ import com.google.mystery.data.model.StoryData;
 @Singleton
 public class AssetsImportManager {
   private static final String STORIES_DOC_METADATA = "storiesDoc";
-  @Inject
-  private IImportDataSource client;
-  @Inject
-  private DataManager dataManager;
-  @Inject
-  private ExecutorService executorService;
-  @Inject
-  private AssetsManager assetsManager;
-  @Inject
-  private StorageManager voicesManager;
-  @Inject
-  private SearchManager searchManager;
-  @Inject
-  private StorageManager storageManager;
-  @Inject
-  private SherlockConfig config;
+  @Inject private IImportDataSource client;
+  @Inject private DataManager dataManager;
+  @Inject private ExecutorService executorService;
+  @Inject private AssetsManager assetsManager;
+  @Inject private StorageManager voicesManager;
+  @Inject private SearchManager searchManager;
+  @Inject private StorageManager storageManager;
+  @Inject private SherlockConfig config;
 
   private final Logger logger = Logger.getLogger(this.getClass().getName());
   private StringWriter latestWriter = new StringWriter();
@@ -82,8 +76,13 @@ public class AssetsImportManager {
     latestWriter.write("Import never started\n");
   }
 
-  private void runImport(String bucketName, HttpRequestInitializer credential, String urlOrId,
-      PrintWriter logWriter, String caseDataId) throws IOException {
+  private void runImport(
+      String bucketName,
+      HttpRequestInitializer credential,
+      String urlOrId,
+      PrintWriter logWriter,
+      String caseDataId)
+      throws IOException {
     Map<String, String> metadata = importCaseDataMetadata(credential, urlOrId);
     String caseId = metadata.get("caseId");
     if (caseId == null) {
@@ -98,8 +97,13 @@ public class AssetsImportManager {
       importStories(bucketName, logWriter, credential, urlOrId, caseDataId, caseId, config);
     } else {
       logWriter.println("Import Stories from " + metadata.get(STORIES_DOC_METADATA));
-      importDocStories(bucketName, logWriter, credential, metadata.get(STORIES_DOC_METADATA),
-          caseDataId, caseId);
+      importDocStories(
+          bucketName,
+          logWriter,
+          credential,
+          metadata.get(STORIES_DOC_METADATA),
+          caseDataId,
+          caseId);
     }
     logWriter.println("Clear diretory");
     searchManager.clearDirectory(caseDataId);
@@ -126,8 +130,9 @@ public class AssetsImportManager {
     logWriter.println("Import is finished!");
   }
 
-  private void importHints(PrintWriter logWriter, HttpRequestInitializer credential, String urlOrId,
-      String caseDataId) throws IOException {
+  private void importHints(
+      PrintWriter logWriter, HttpRequestInitializer credential, String urlOrId, String caseDataId)
+      throws IOException {
     String range = "Hints!A1:C";
     List<List<Object>> values = client.getData(credential, urlOrId, range);
     if (values == null || values.size() < 1) {
@@ -156,11 +161,11 @@ public class AssetsImportManager {
           if (row.size() > 2) {
             suggestions =
                 Lists.newArrayList(Splitter.on(",").trimResults().split(row.get(2).toString()));
-            for (ListIterator<String> i = suggestions.listIterator(); i.hasNext();) {
+            for (ListIterator<String> i = suggestions.listIterator(); i.hasNext(); ) {
               String suggestion = i.next();
               if (suggestion.length() > 20) {
-                logWriter.printf("Error: %s suggestion is too long limit is 20 chars\n",
-                    suggestion);
+                logWriter.printf(
+                    "Error: %s suggestion is too long limit is 20 chars\n", suggestion);
                 i.remove();
               }
             }
@@ -174,8 +179,9 @@ public class AssetsImportManager {
     }
   }
 
-  private void importQuestions(PrintWriter logWriter, HttpRequestInitializer credential,
-      String urlOrId, String caseDataId) throws IOException {
+  private void importQuestions(
+      PrintWriter logWriter, HttpRequestInitializer credential, String urlOrId, String caseDataId)
+      throws IOException {
     String range = "Questions!A1:C";
     List<List<Object>> values = client.getData(credential, urlOrId, range);
     if (values == null || values.size() < 1) {
@@ -198,8 +204,8 @@ public class AssetsImportManager {
     }
   }
 
-  private void runImportGeneral(HttpRequestInitializer credential, String urlOrId,
-      PrintWriter logWriter) throws IOException {
+  private void runImportGeneral(
+      HttpRequestInitializer credential, String urlOrId, PrintWriter logWriter) throws IOException {
     logWriter.println("Reading Streets");
     List<String> streets = readAsList(credential, urlOrId, "Streets");
     assetsManager.putStreets(streets);
@@ -220,13 +226,16 @@ public class AssetsImportManager {
       throws IOException {
     String range = string + "!A1:A";
     List<List<Object>> values = client.getData(credential, urlOrId, range);
-    return values.stream().filter(l -> !l.isEmpty()).map(l -> l.get(0).toString())
+    return values
+        .stream()
+        .filter(l -> !l.isEmpty())
+        .map(l -> l.get(0).toString())
         .collect(Collectors.toList());
   }
 
   /** Importing Businesses page */
-  private List<DirectoryEntry> importDirectory(PrintWriter logWriter,
-      HttpRequestInitializer credential, String urlOrId) throws IOException {
+  private List<DirectoryEntry> importDirectory(
+      PrintWriter logWriter, HttpRequestInitializer credential, String urlOrId) throws IOException {
     List<DirectoryEntry> result = new ArrayList<>();
     String range = "Directory!A1:C";
     List<List<Object>> values = client.getData(credential, urlOrId, range);
@@ -243,8 +252,8 @@ public class AssetsImportManager {
           String name = row.get(0).toString();
           String location = assetsManager.checkLocation(row.get(1).toString());
           if (location == null) {
-            logWriter
-                .println("Invalid location " + row.get(1).toString() + " for " + name + "ignoring");
+            logWriter.println(
+                "Invalid location " + row.get(1).toString() + " for " + name + "ignoring");
             continue;
           }
 
@@ -261,8 +270,13 @@ public class AssetsImportManager {
     return result;
   }
 
-  private void importDocStories(String bucketName, PrintWriter logWriter,
-      HttpRequestInitializer credential, String urlOrId, String caseDataId, String caseId) {
+  private void importDocStories(
+      String bucketName,
+      PrintWriter logWriter,
+      HttpRequestInitializer credential,
+      String urlOrId,
+      String caseDataId,
+      String caseId) {
     if (!(client instanceof GSuiteDataSource)) {
       throw new IllegalArgumentException("GSuiteDatasource required for doc stories import.");
     }
@@ -270,13 +284,15 @@ public class AssetsImportManager {
     List<String> noLatLongIds = new ArrayList<>();
     List<StoryData> storyData = new ArrayList<>();
     try {
-      for (GSuiteDataSource.DocEntity entity : ((GSuiteDataSource) client).loadDocsData(credential,
-          urlOrId)) {
+      for (GSuiteDataSource.DocEntity entity :
+          ((GSuiteDataSource) client).loadDocsData(credential, urlOrId)) {
         StoryData story = docEntityToStory(entity);
-        if (Strings.isNullOrEmpty(story.getId()) || Strings.isNullOrEmpty(story.getTitle())
+        if (Strings.isNullOrEmpty(story.getId())
+            || Strings.isNullOrEmpty(story.getTitle())
             || Strings.isNullOrEmpty(story.getText())) {
-          logWriter
-              .println(String.format("Incorrect sorry entry id=%s, title=%s, clues=%s, latlong=%s",
+          logWriter.println(
+              String.format(
+                  "Incorrect sorry entry id=%s, title=%s, clues=%s, latlong=%s",
                   story.getId(), story.getTitle(), story.getTitle(), story.getLatlong()));
           continue;
         }
@@ -289,8 +305,9 @@ public class AssetsImportManager {
         }
         storyData.add(story);
       }
-      logWriter
-          .println(String.format("Simple stories ids: %s\n" + "Stories without latlong ids: %s",
+      logWriter.println(
+          String.format(
+              "Simple stories ids: %s\n" + "Stories without latlong ids: %s",
               simpleStoryIds, noLatLongIds));
     } catch (IOException e) {
       logWriter.println("Error exporting stories: " + e.getMessage());
@@ -301,14 +318,19 @@ public class AssetsImportManager {
     importStoriesFromData(bucketName, logWriter, storyData, caseId, caseDataId);
   }
 
-  private void importStoriesFromData(String bucketName, PrintWriter logWriter,
-      List<StoryData> storyData, String caseId, String caseDataId) {
+  private void importStoriesFromData(
+      String bucketName,
+      PrintWriter logWriter,
+      List<StoryData> storyData,
+      String caseId,
+      String caseDataId) {
 
     int locationsCounter = 0;
     int timesArticleCounter = 0;
     int simpleCounter = 0;
     for (StoryData data : storyData) {
-      String audioUrl = voicesManager.getStoryMediaLinkAndMakePublic(bucketName, caseId, data.getId());
+      String audioUrl =
+          voicesManager.getStoryMediaLinkAndMakePublic(bucketName, caseId, data.getId());
       String imageUrl = voicesManager.getStoryImageUrl(bucketName, caseId, data.getId());
 
       URL audioLink = null;
@@ -334,27 +356,51 @@ public class AssetsImportManager {
       }
 
       if (assetsManager.checkLocation(data.getId()) != null) {
-        dataManager.addStory(Story.location(caseDataId, assetsManager.checkLocation(data.getId()),
-            data.getTitle(), data.getText(), audioLink, clues, data.getLatlong(), imageLink));
+        dataManager.addStory(
+            Story.location(
+                caseDataId,
+                assetsManager.checkLocation(data.getId()),
+                data.getTitle(),
+                data.getText(),
+                audioLink,
+                clues,
+                data.getLatlong(),
+                imageLink));
         locationsCounter++;
       } else if (checkTimesArticle(data.getId())) {
-        dataManager.addStory(Story.timesArticle(caseDataId, data.getId(), data.getTitle(),
-            data.getText(), audioLink, imageLink));
+        dataManager.addStory(
+            Story.timesArticle(
+                caseDataId, data.getId(), data.getTitle(), data.getText(), audioLink, imageLink));
         timesArticleCounter++;
       } else {
-        dataManager.addStory(Story.simple(caseDataId, data.getId(), data.getTitle(), data.getText(),
-            audioLink, clues, data.getLatlong(), imageLink));
+        dataManager.addStory(
+            Story.simple(
+                caseDataId,
+                data.getId(),
+                data.getTitle(),
+                data.getText(),
+                audioLink,
+                clues,
+                data.getLatlong(),
+                imageLink));
         simpleCounter++;
       }
     }
-    logWriter.printf("%s locations, %s times articles and %s simple stories are imported\n",
+    logWriter.printf(
+        "%s locations, %s times articles and %s simple stories are imported\n",
         locationsCounter, timesArticleCounter, simpleCounter);
   }
 
   /** Importing stories section from stories sheet. */
-  private void importStories(String bucketName, PrintWriter logWriter,
-      HttpRequestInitializer credential, String urlOrId, String caseDataId, String caseId,
-      SherlockConfig config) throws IOException {
+  private void importStories(
+      String bucketName,
+      PrintWriter logWriter,
+      HttpRequestInitializer credential,
+      String urlOrId,
+      String caseDataId,
+      String caseId,
+      SherlockConfig config)
+      throws IOException {
     String range = "Stories!A1:E";
     List<List<Object>> values = client.getData(credential, urlOrId, range);
     List<StoryData> storiesData = new ArrayList<>();
@@ -379,8 +425,13 @@ public class AssetsImportManager {
     importStoriesFromData(bucketName, logWriter, storiesData, caseId, caseDataId);
   }
 
-  private Collection<Clue> importClues(String bucketName, PrintWriter logWriter,
-      HttpRequestInitializer credential, String urlOrId, String caseDataId, String caseId)
+  private Collection<Clue> importClues(
+      String bucketName,
+      PrintWriter logWriter,
+      HttpRequestInitializer credential,
+      String urlOrId,
+      String caseDataId,
+      String caseId)
       throws IOException {
     String range = "Clues!A1:E";
     List<Clue> clues = new ArrayList<>();
@@ -441,38 +492,40 @@ public class AssetsImportManager {
     return latestWriter.toString();
   }
 
-  public void importCaseAssets(final HttpRequestInitializer credential, final String urlOrId,
-      String caseDataId) throws IOException {
-    latestWriter = new StringWriter();
+  public void importCaseAssets(
+      final HttpRequestInitializer credential, final String urlOrId, String caseDataId)
+      throws IOException {
     final PrintWriter printWriter = createWriter();
     final String bucketName = config.getBucketName();
 
-    executorService.submit(() -> {
-      try {
-        runImport(bucketName, credential, urlOrId, printWriter, caseDataId);
-      } catch (Throwable e) {
-        logger.log(Level.SEVERE, "Error running import task", e);
-        e.printStackTrace(printWriter);
-      }
-    });
+    executorService.submit(
+        () -> {
+          try {
+            runImport(bucketName, credential, urlOrId, printWriter, caseDataId);
+          } catch (Throwable e) {
+            logger.log(Level.SEVERE, "Error running import task", e);
+            e.printStackTrace(printWriter);
+          }
+        });
   }
 
   public void importGeneralAssets(final HttpRequestInitializer credential, final String urlOrId)
       throws IOException {
-    latestWriter = new StringWriter();
     final PrintWriter printWriter = createWriter();
 
-    executorService.submit(() -> {
-      try {
-        runImportGeneral(credential, urlOrId, printWriter);
-      } catch (Exception e) {
-        logger.log(Level.SEVERE, "Error running import task", e);
-        e.printStackTrace(printWriter);
-      }
-    });
+    executorService.submit(
+        () -> {
+          try {
+            runImportGeneral(credential, urlOrId, printWriter);
+          } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error running import task", e);
+            e.printStackTrace(printWriter);
+          }
+        });
   }
 
-  protected PrintWriter createWriter() {
+  public PrintWriter createWriter() {
+    latestWriter = new StringWriter();
     return new PrintWriter(latestWriter) {
       @Override
       public void println(String x) {
@@ -482,8 +535,8 @@ public class AssetsImportManager {
     };
   }
 
-  public Map<String, String> importCaseDataMetadata(HttpRequestInitializer credential,
-      String urlOrId) throws IOException {
+  public Map<String, String> importCaseDataMetadata(
+      HttpRequestInitializer credential, String urlOrId) throws IOException {
     String range = "Metadata!A1:B";
     Map<String, String> metadata = new HashMap<>();
     List<List<Object>> values = client.getData(credential, urlOrId, range);
@@ -501,13 +554,12 @@ public class AssetsImportManager {
     return metadata;
   }
 
-
-  static public StoryData docEntityToStory(DocEntity entity) {
+  public static StoryData docEntityToStory(DocEntity entity) {
     // going through first content lines and looking
     List<String> lines = Splitter.on("\n").splitToList(entity.getContent());
     int consumedLines = 0;
     Map<String, String> metadata = new HashMap<>();
-    for (Iterator<String> i = lines.iterator(); i.hasNext();) {
+    for (Iterator<String> i = lines.iterator(); i.hasNext(); ) {
       String line = i.next();
       if (line.trim().isEmpty()) {
         if (!metadata.isEmpty()) {
@@ -523,43 +575,53 @@ public class AssetsImportManager {
     }
     String newContent = Joiner.on("\n").join(lines.subList(consumedLines, lines.size())).trim();
 
-    return new StoryData(metadata.get("id"), entity.getHeader(), metadata.get("clues"),
-        metadata.get("latlong"), newContent);
+    return new StoryData(
+        metadata.get("id"),
+        entity.getHeader(),
+        metadata.get("clues"),
+        metadata.get("latlong"),
+        newContent);
   }
 
   public void generateAudio(String caseId, Collection<Story> stories) {
-    latestWriter = new StringWriter();
     final PrintWriter printWriter = createWriter();
     final String bucketName = config.getBucketName();
 
-    executorService.submit(() -> {
-      try {
-        printWriter.println("Starting audio import");
-        for (Story story : stories) {
-          printWriter.println("Generating audio for: " + story.getId());
-          List<String> splittedText = splitWithLimit(story.getText(), 5000);
-          if (splittedText.size() < 2) {
-            String url =
-                storageManager.generateTTSAudio(bucketName, caseId, story.getId().toLowerCase(),
-                    SherlockResponse.textToSsml(story.getText()), printWriter);
-            printWriter.println("Generated url: " + url);
-          } else {
-            for (int i = 0; i < splittedText.size(); i++) {
-              String url = storageManager.generateTTSAudio(bucketName, caseId,
-                  story.getId().toLowerCase() + "-" + i,
-                  SherlockResponse.textToSsml(splittedText.get(i)), printWriter);
-              printWriter.println("Generated url: " + url);
+    executorService.submit(
+        () -> {
+          try {
+            printWriter.println("Starting audio import");
+            for (Story story : stories) {
+              printWriter.println("Generating audio for: " + story.getId());
+              List<String> splittedText = splitWithLimit(story.getText(), 5000);
+              if (splittedText.size() < 2) {
+                String url =
+                    storageManager.generateTTSAudio(
+                        bucketName,
+                        caseId,
+                        story.getId().toLowerCase(),
+                        SherlockResponse.textToSsml(story.getText()),
+                        printWriter);
+                printWriter.println("Generated url: " + url);
+              } else {
+                for (int i = 0; i < splittedText.size(); i++) {
+                  String url =
+                      storageManager.generateTTSAudio(
+                          bucketName,
+                          caseId,
+                          story.getId().toLowerCase() + "-" + i,
+                          SherlockResponse.textToSsml(splittedText.get(i)),
+                          printWriter);
+                  printWriter.println("Generated url: " + url);
+                }
+              }
             }
+            printWriter.println("Audio generation finished.");
+          } catch (Throwable e) {
+            logger.log(Level.SEVERE, "Error running import task", e);
+            e.printStackTrace(printWriter);
           }
-
-        }
-        printWriter.println("Audio generation finished.");
-      } catch (Throwable e) {
-        logger.log(Level.SEVERE, "Error running import task", e);
-        e.printStackTrace(printWriter);
-      }
-    });
-
+        });
   }
 
   public static List<String> splitWithLimit(String string, int limit) {

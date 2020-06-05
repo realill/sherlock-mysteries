@@ -1,0 +1,7 @@
+syntax = "proto3";
+package com.sherlockmysteries.pdata;
+
+message HintData {
+	string text = 1;
+	repeated string required_locations = 2;
+}

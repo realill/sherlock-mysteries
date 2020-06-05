@@ -14,6 +14,7 @@
 
 package com.google.mystery.web.admin;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -22,14 +23,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.csv.CSVFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import com.google.common.collect.ImmutableList;
 import com.google.mystery.assets.AdminManager;
 import com.google.mystery.assets.AssetsImportManager;
@@ -39,23 +43,37 @@ import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.model.Case;
 import com.google.mystery.data.model.DirectoryEntry;
 import com.google.mystery.data.model.Story;
+import com.sherlockmysteries.pdata.SMDataManager;
 
 @Controller
 public class AdminController {
-  @Inject
-  private DialogflowExportEntitiesManager apiaiExportEntitiesManager;
-  @Inject
-  private AssetsImportManager assetsImportManager;
-  @Inject
-  private AssetsManager assetsManager;
-  @Inject
-  private AdminManager adminManager;
-  @Inject
-  private SherlockConfig config;
+  @Inject private DialogflowExportEntitiesManager apiaiExportEntitiesManager;
+  @Inject private AssetsImportManager assetsImportManager;
+  @Inject private AssetsManager assetsManager;
+  @Inject private AdminManager adminManager;
+  @Inject private SherlockConfig config;
+  @Inject private SMDataManager smDataManager;
 
-  static List<String> CONFIG_KEYS = ImmutableList.of(SherlockConfig.BASE_URL,
-      SherlockConfig.ASSISTANT_DIRECTORY_URL, SherlockConfig.BUCKET_NAME,
-      SherlockConfig.DOCS_SECRET, SherlockConfig.FOOTER_SCRIPTS, SherlockConfig.DIALOGFLOW_SECRET);
+  static List<String> CONFIG_KEYS =
+      ImmutableList.of(
+          SherlockConfig.BASE_URL,
+          SherlockConfig.ASSISTANT_DIRECTORY_URL,
+          SherlockConfig.BUCKET_NAME,
+          SherlockConfig.DOCS_SECRET,
+          SherlockConfig.FOOTER_SCRIPTS,
+          SherlockConfig.DIALOGFLOW_SECRET);
+
+  @GetMapping("/admin/export-smdata")
+  public String exportSMData(
+      @RequestParam(value = "caseId", required = true) String caseId, Model model) {
+    PrintWriter writer = assetsImportManager.createWriter();
+    try (FileOutputStream tempFile = new FileOutputStream("/tmp/case.zip")) {
+      smDataManager.generateSMData(caseId, writer, tempFile);
+    } catch (IOException e) {
+      writer.println("Error exporting sm data:" + e.getMessage());
+    }
+    return "redirect:/admin/import-log";
+  }
 
   @PostMapping("/admin/config")
   public String saveConfig(HttpServletRequest request, Model model) {
@@ -69,8 +87,8 @@ public class AdminController {
       // validating
       new SherlockConfig(configMap);
     } catch (MalformedURLException e) {
-      model.addAttribute("errors",
-          ImmutableList.of("Wrong url, config is not saved " + e.getMessage()));
+      model.addAttribute(
+          "errors", ImmutableList.of("Wrong url, config is not saved " + e.getMessage()));
       model.addAttribute("config", config);
       return "admin/config";
     }
@@ -85,8 +103,10 @@ public class AdminController {
   }
 
   @GetMapping("/admin/generate-audio")
-  public String generateAudio(@RequestParam(value = "caseId", required = true) String caseId,
-      @RequestParam(value = "storyId", required = false) String storyId, Model model) {
+  public String generateAudio(
+      @RequestParam(value = "caseId", required = true) String caseId,
+      @RequestParam(value = "storyId", required = false) String storyId,
+      Model model) {
     Case c = assetsManager.getCase(caseId);
     if (c == null || c.getCaseDataId() == null) {
       model.addAttribute("content", "Invalid case, caseId=" + caseId);
@@ -96,11 +116,16 @@ public class AdminController {
     // filtering out stories that we do not need
     List<Story> stories;
     if (storyId == null) {
-      stories = assetsManager.getAllStories(c.getCaseDataId()).stream()
-          .filter(s -> s.getType().equals(Story.LOCATION)
-              || s.getId().equalsIgnoreCase("caseIntroduction")
-              || s.getId().equalsIgnoreCase("finalSolution"))
-          .collect(Collectors.toList());
+      stories =
+          assetsManager
+              .getAllStories(c.getCaseDataId())
+              .stream()
+              .filter(
+                  s ->
+                      s.getType().equals(Story.LOCATION)
+                          || s.getId().equalsIgnoreCase("caseIntroduction")
+                          || s.getId().equalsIgnoreCase("finalSolution"))
+              .collect(Collectors.toList());
     } else {
       Story story = assetsManager.getStory(c.getCaseDataId(), storyId);
       if (story == null) {
@@ -119,8 +144,11 @@ public class AdminController {
   }
 
   @PostMapping("/admin/dialogflow")
-  public String exportEntities(HttpServletRequest request, Model model,
-      @RequestParam(value = "projectName", required = true) String projectName) throws IOException {
+  public String exportEntities(
+      HttpServletRequest request,
+      Model model,
+      @RequestParam(value = "projectName", required = true) String projectName)
+      throws IOException {
 
     if (projectName != null) {
       StringWriter stringWriter = new StringWriter();
@@ -142,5 +170,4 @@ public class AdminController {
     model.addAttribute("content", outputCsv.toString());
     return "admin/show-data";
   }
-
 }

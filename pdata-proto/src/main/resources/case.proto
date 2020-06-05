@@ -1,0 +1,12 @@
+syntax = "proto3";
+package com.sherlockmysteries.pdata;
+
+message CaseData {
+	string caseid = 1;
+	string name = 2;
+	repeated string streets = 3;
+	repeated string locations = 4;
+	string author = 5;
+	string voice_actor = 6;
+	string illustration_artist = 7;
+}

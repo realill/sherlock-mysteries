@@ -20,7 +20,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -34,6 +36,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
+
 import com.google.appengine.api.ThreadManager;
 import com.google.common.collect.Maps;
 import com.google.mystery.actions.ActionsManager;
@@ -57,29 +60,31 @@ import com.google.mystery.data.CacheManager;
 import com.google.mystery.data.DataManager;
 import com.google.mystery.web.admin.AdminController;
 import com.google.mystery.web.admin.CasesController;
+import com.sherlockmysteries.pdata.SMDataManager;
 
 @Configuration
 @EnableWebMvc
 @Import({
-    // Admin controllers.
-    AdminController.class, CasesController.class,
-    // Runtime controllers.
-    PublicController.class, WebhookControllerV2.class})
+  // Admin controllers.
+  AdminController.class, CasesController.class,
+  // Runtime controllers.
+  PublicController.class, WebhookControllerV2.class
+})
 public class AppConfig implements WebMvcConfigurer {
-  @Inject
-  private CacheManager cacheManager;
-  @Inject
-  private DataManager dataManager;
+  @Inject private CacheManager cacheManager;
+  @Inject private DataManager dataManager;
   private static Logger logger = Logger.getLogger(AppConfig.class.getName());
-
 
   @Bean
   @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
   public SherlockConfig config() {
     try {
       // Using current context url
-      String currentBaseUrl = ServletUriComponentsBuilder.fromCurrentRequest().replacePath("")
-          .replaceQuery("").toUriString();
+      String currentBaseUrl =
+          ServletUriComponentsBuilder.fromCurrentRequest()
+              .replacePath("")
+              .replaceQuery("")
+              .toUriString();
       Map<String, String> configParams = cacheManager.getConfig(k -> dataManager.getConfigMap());
       Map<String, String> newConfigParams = Maps.newHashMap(configParams);
       newConfigParams.put(SherlockConfig.BASE_URL, currentBaseUrl);
@@ -212,5 +217,10 @@ public class AppConfig implements WebMvcConfigurer {
   @Bean
   public AdminManager adminManager() {
     return new AdminManager();
+  }
+
+  @Bean
+  public SMDataManager smDataManager() {
+    return new SMDataManager();
   }
 }

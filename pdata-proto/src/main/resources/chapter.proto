@@ -1,0 +1,16 @@
+syntax = "proto3";
+package com.sherlockmysteries.pdata;
+
+message ClueData {
+	string clueid = 1;
+	string name = 2;
+	string text = 3;
+}
+
+message ChapterData {
+	string id = 1;
+	string name = 2;
+	string text = 3;
+	repeated ClueData clues = 4;
+	string latlong = 5;
+}

@@ -24,10 +24,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.inject.Inject;
+
 import com.google.appengine.api.search.Document;
 import com.google.appengine.api.search.Field;
 import com.google.appengine.api.search.GetRequest;
+import com.google.appengine.api.search.GetResponse;
 import com.google.appengine.api.search.Index;
 import com.google.appengine.api.search.IndexSpec;
 import com.google.appengine.api.search.Query;
@@ -102,10 +105,49 @@ public class SearchManager {
     return resultBuilder.build();
   }
 
-  protected static DirectoryEntry toDirectoryEntry(ScoredDocument doc) {
+  public List<DirectoryEntry> getAllEntries(String caseDataId) {
+
+    GetResponse<Document> response =
+        getCaseDirectory(caseDataId)
+            .getRange(
+                GetRequest.newBuilder().setReturningIdsOnly(true).setIncludeStart(true).build());
+    ArrayList<DirectoryEntry> result = new ArrayList<DirectoryEntry>(response.getResults().size());
+    for (Document d : response) {
+      Document entryDoc = getCaseDirectory(caseDataId).get(d.getId());
+      result.add(toFullDirectoryEntry(entryDoc));
+    }
+
+    response =
+        getGeneralDirectory()
+            .getRange(
+                GetRequest.newBuilder().setReturningIdsOnly(true).setIncludeStart(true).build());
+    result.ensureCapacity(result.size() + response.getResults().size());
+    for (Document d : response) {
+      Document entryDoc = getGeneralDirectory().get(d.getId());
+      result.add(toFullDirectoryEntry(entryDoc));
+    }
+
+    return result;
+  }
+
+  protected static DirectoryEntry toDirectoryEntry(Document doc) {
     String location = doc.getOnlyField("location").getAtom();
     String name = doc.getOnlyField("name").getText();
     return new DirectoryEntry(location, name);
+  }
+
+  protected static DirectoryEntry toFullDirectoryEntry(Document doc) {
+    String location = doc.getOnlyField("location").getAtom();
+    String name = doc.getOnlyField("name").getText();
+    String category = null;
+    if (doc.getFieldCount("category") == 1) {
+      category = doc.getOnlyField("category").getText();
+    }
+    String keywords = null;
+    if (doc.getFieldCount("keywords") == 1) {
+      keywords = doc.getOnlyField("keywords").getText();
+    }
+    return new DirectoryEntry(location, name, category, keywords);
   }
 
   public List<String> searchCluesIds(String caseDataId, String query) {
