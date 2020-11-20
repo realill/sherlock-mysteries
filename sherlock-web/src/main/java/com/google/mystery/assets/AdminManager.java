@@ -124,6 +124,8 @@ public class AdminManager {
   }
 
   private static List<String> lastNames = ImmutableList.of();
+  private static List<String> likelyLastNames = ImmutableList.of();
+  private static List<String> otherLastNames = ImmutableList.of();
   private static List<String> boyNames = ImmutableList.of();
   private static List<String> girlNames = ImmutableList.of();
   private static List<String> numberPostfixes =
@@ -133,6 +135,9 @@ public class AdminManager {
       lastNames = Files.readAllLines(Paths.get("WEB-INF/data/last-names.txt"));
       boyNames = Files.readAllLines(Paths.get("WEB-INF/data/boy-names.txt"));
       girlNames = Files.readAllLines(Paths.get("WEB-INF/data/girl-names.txt"));
+      
+      likelyLastNames = lastNames.subList(0, 50);
+      otherLastNames = lastNames.subList(50, lastNames.size());
     } catch (IOException e) {
       logger.error("Error initializing data", e);
     }
@@ -142,16 +147,29 @@ public class AdminManager {
     List<String> streets = new ArrayList<>(assetsManager.getStreets());
     List<DirectoryEntry> result = new ArrayList<>();
 
-    for (int i = 0; i < 300; i++) {
+    for (int i = 0; i < 500; i++) {
       String firstName;
       /// 10% are females
       if (random.nextInt(10) == 0) {
         firstName = normalDistribution(girlNames);
       } else {
         firstName = normalDistribution(boyNames);
+        // 1% of men are Sirs.
+        if (random.nextInt(100) == 0) {
+          firstName = "Sir " + firstName;
+        } else if (random.nextInt(200) == 0) {
+          // 0.5% are Lords
+          firstName = "Lord " + firstName;
+        }
       }
       normalDistribution(boyNames);
-      String lastName = normalDistribution(lastNames);
+      // Using first 50 names as more likely names.
+      String lastName = normalDistribution(likelyLastNames);
+      // 5/6 chance to get other name.
+      if (random.nextInt(6) > 0) {
+        // other names are in linear distribution
+        lastName = linearDistr(otherLastNames);
+      }
       String street = linearDistr(streets);
       String number = (normalIndex(200, 2.5d) + 1) + linearDistr(numberPostfixes);
       DirectoryEntry entry = new DirectoryEntry(number + " " + street, firstName + " " + lastName);

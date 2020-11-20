@@ -20,12 +20,13 @@
 	<artifactId>pdata-proto</artifactId>
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
+		<!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-javalite -->
 		<dependency>
 			<groupId>com.google.protobuf</groupId>
 			<artifactId>protobuf-java</artifactId>
-			<version>3.11.4</version>
+			<version>4.0.0-rc-2</version>
 		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -40,26 +41,22 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<protocVersion>3.11.4</protocVersion>
 							<inputDirectories>
 								<include>src/main/resources</include>
 							</inputDirectories>
+							<outputTargets>
+								<outputTarget>
+									<type>java</type>
+								</outputTarget>
+							</outputTargets>
 						</configuration>
 					</execution>
 				</executions>
 				<configuration>
-					<outputTargets>
-						<outputTarget>
-							<type>java</type>
-							<!-- explicitly specify artifact to force download via maven. -->
-							<pluginArtifact>com.google.protobuf:protoc:3.11.4</pluginArtifact>
-							<!-- compile against the 'lite' runtime. Former option from the proto 
-								file. -->
-							<outputOptions>lite</outputOptions>
-							<!-- include sources in target jar file. -->
-							<addSources>main</addSources>
-						</outputTarget>
-					</outputTargets>
+	<!-- let compiler use well defined types from protobuf itself. -->
+					<includeStdTypes>true</includeStdTypes>
+					<!-- always recompile. True (default) means: Only recompile if changed. -->
+					<optimizeCodegen>false</optimizeCodegen>
 				</configuration>
 			</plugin>
 		</plugins>

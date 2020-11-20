@@ -117,10 +117,11 @@ public class SearchManager {
       result.add(toFullDirectoryEntry(entryDoc));
     }
 
+    // Max 1000 elements, should be enough but may require changes if there is more then that.
     response =
         getGeneralDirectory()
             .getRange(
-                GetRequest.newBuilder().setReturningIdsOnly(true).setIncludeStart(true).build());
+                GetRequest.newBuilder().setReturningIdsOnly(true).setLimit(1000).setIncludeStart(true).build());
     result.ensureCapacity(result.size() + response.getResults().size());
     for (Document d : response) {
       Document entryDoc = getGeneralDirectory().get(d.getId());

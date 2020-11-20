@@ -6,8 +6,11 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -17,8 +20,10 @@ import javax.inject.Singleton;
 
 import org.apache.commons.text.WordUtils;
 
+import com.google.api.client.repackaged.com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.assets.SearchManager;
 import com.google.mystery.data.model.Clue;
@@ -118,10 +123,20 @@ public class SMDataManager {
         articleData.build().writeDelimitedTo(zipOut);
       }
 
-      // Writing Directory Data
+      // Writing Directory Data.
       zipOut.putNextEntry(new ZipEntry("directory-entries.pbdata"));
       Map<String, DirectoryCategoryData.Builder> categories = new HashMap<>();
-      for (DirectoryEntry entry : searchManager.getAllEntries(c.getCaseDataId())) {
+      List<DirectoryEntry> entries = searchManager.getAllEntries(c.getCaseDataId());
+      Set<String> uniqueNames = new HashSet<>();
+      
+      logWriter.println("Number Entries: " + entries.size());
+      for (DirectoryEntry entry : entries) {
+        // Ensure we do not add the same name twice.
+        if (uniqueNames.contains(entry.getName().toLowerCase())) {
+          continue;
+        }
+        uniqueNames.add(entry.getName().toLowerCase());
+        
         DirectoryEntryData.Builder directoryEntry =
             DirectoryEntryData.newBuilder()
                 .setLocation(entry.getLocation())
@@ -131,7 +146,7 @@ public class SMDataManager {
         }
         if (Strings.isNullOrEmpty(entry.getCategory())
             || entry.getCategory().startsWith("Person")) {
-          logWriter.println("Entry: " + directoryEntry.toString());
+          directoryEntry.setName(personName(directoryEntry.getName()));
           directoryEntry.build().writeDelimitedTo(zipOut);
         } else {
           String[] splittedCategory = entry.getCategory().split(",");
@@ -218,5 +233,14 @@ public class SMDataManager {
         zipOut.write(data, 0, byteContent);
       }
     }
+  }
+  
+  static public String personName(String name) {
+    List<String> splitted = Lists.newArrayList(Splitter.on(" ").trimResults().split(name));
+    if (splitted.size() > 1) {
+      int last = splitted.size() - 1;
+      return splitted.get(last) + ", " + Joiner.on(" ").join(splitted.subList(0, last));
+    }
+    return name;
   }
 }
