@@ -3,9 +3,10 @@ package com.sherlockmysteries.pdata;
 
 message QuestionData {
 	string question = 1;
+	// first one is correct.
 	repeated string possible_answers = 2;
 	string answer = 3;
 	int32 order = 4;
-	bool optional_question = 5;
+	bool optional = 5;
 	int32 score = 6;
 }

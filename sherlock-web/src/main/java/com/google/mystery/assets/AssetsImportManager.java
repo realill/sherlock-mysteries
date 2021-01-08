@@ -182,7 +182,7 @@ public class AssetsImportManager {
   private void importQuestions(
       PrintWriter logWriter, HttpRequestInitializer credential, String urlOrId, String caseDataId)
       throws IOException {
-    String range = "Questions!A1:C";
+    String range = "Questions!A1:D";
     List<List<Object>> values = client.getData(credential, urlOrId, range);
     if (values == null || values.size() < 1) {
       logWriter.println("No data found for Questions. Aborting");
@@ -196,7 +196,12 @@ public class AssetsImportManager {
           String question = row.get(0).toString();
           String answer = row.get(1).toString();
           int score = Integer.parseInt(row.get(2).toString());
-          dataManager.addQuestion(new Question(caseDataId, question, answer, score, counter));
+          List<String> possibleAnswers = ImmutableList.of();
+          if (row.size() >= 4) {
+            possibleAnswers = Splitter.on("\n").trimResults().splitToList(row.get(3).toString());
+          }
+          dataManager.addQuestion(
+              new Question(caseDataId, question, answer, score, counter, possibleAnswers));
           counter++;
         }
       }

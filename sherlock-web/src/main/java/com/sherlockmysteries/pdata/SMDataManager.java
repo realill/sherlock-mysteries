@@ -4,7 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -128,7 +130,7 @@ public class SMDataManager {
       Map<String, DirectoryCategoryData.Builder> categories = new HashMap<>();
       List<DirectoryEntry> entries = searchManager.getAllEntries(c.getCaseDataId());
       Set<String> uniqueNames = new HashSet<>();
-      
+
       logWriter.println("Number Entries: " + entries.size());
       for (DirectoryEntry entry : entries) {
         // Ensure we do not add the same name twice.
@@ -136,7 +138,7 @@ public class SMDataManager {
           continue;
         }
         uniqueNames.add(entry.getName().toLowerCase());
-        
+
         DirectoryEntryData.Builder directoryEntry =
             DirectoryEntryData.newBuilder()
                 .setLocation(entry.getLocation())
@@ -184,12 +186,10 @@ public class SMDataManager {
             QuestionData.newBuilder()
                 .setQuestion(question.getQuestion())
                 .setAnswer(question.getAnswer())
+                .addAllPossibleAnswers(question.getPossibleAnswers())
                 .setScore(question.getScore())
                 .setOrder(question.getOrder())
-                .setOptionalQuestion(question.getOrder() <= 50);
-        questionData.addPossibleAnswers("1");
-        questionData.addPossibleAnswers("2");
-        questionData.addPossibleAnswers("3");
+                .setOptional(question.getScore() <= 10);
         logWriter.println("Question: " + questionData.toString());
         questionData.build().writeDelimitedTo(zipOut);
       }
@@ -203,9 +203,56 @@ public class SMDataManager {
         hintData.build().writeDelimitedTo(zipOut);
       }
 
-      //       Writing Images.
+      // Searching for newspaper image.
+      findAndInsertNewspaper(imagesOrAudioToStore, logWriter);
+
+      // Writing Images.
       for (Entry<URL, String> imageEntry : imagesOrAudioToStore.entrySet()) {
         writeImageOrAudio(imageEntry.getKey(), imageEntry.getValue(), zipOut, logWriter);
+      }
+    }
+  }
+
+  protected void findAndInsertNewspaper(Map<URL, String> imagesOrAudio, PrintWriter logWriter) {
+    for (Entry<URL, String> imageEntry : imagesOrAudio.entrySet()) {
+      URL baseUrl = imageEntry.getKey();
+      if (baseUrl.getPath().endsWith(".png")
+          || baseUrl.getPath().endsWith(".jpg")
+          || baseUrl.getPath().endsWith(".jpeg")) {
+        // another image is found.
+        try {
+          List<String> pathElements = Arrays.asList(baseUrl.getPath().split("/"));
+          if (pathElements.size() == 0) {
+            continue;
+          }
+
+          pathElements = pathElements.subList(0, pathElements.size() - 1);
+
+          for (String newspaperName :
+              new String[] {"/newspaper.png", "/newspaper.jpg", "/newspaper.jpeg"}) {
+            URL newspaperUrl =
+                new URL(
+                    baseUrl.getProtocol(),
+                    baseUrl.getHost(),
+                    baseUrl.getPort(),
+                    Joiner.on("/").join(pathElements) + newspaperName,
+                    null);
+            HttpURLConnection huc = (HttpURLConnection) newspaperUrl.openConnection();
+            int responseCode = huc.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+              logWriter.println("Newspaper Image found at: " + newspaperUrl.toString());
+              imagesOrAudio.put(newspaperUrl, "newspaper");
+              huc.disconnect();
+              break;
+            } else {
+              huc.disconnect();
+            }
+          }
+        } catch (IOException e) {
+          e.printStackTrace(logWriter);
+        }
+
+        break;
       }
     }
   }
@@ -215,7 +262,7 @@ public class SMDataManager {
     String newName;
     if (image.getPath().endsWith(".png")) {
       newName = "images/" + name + ".png";
-    } else if (image.getPath().endsWith(".jpg")) {
+    } else if (image.getPath().endsWith(".jpg") || image.getPath().endsWith(".jpeg")) {
       newName = "images/" + name + ".jpg";
     } else if (image.getPath().endsWith(".mp3")) {
       newName = "audio/" + name + ".mp3";
@@ -234,8 +281,8 @@ public class SMDataManager {
       }
     }
   }
-  
-  static public String personName(String name) {
+
+  public static String personName(String name) {
     List<String> splitted = Lists.newArrayList(Splitter.on(" ").trimResults().split(name));
     if (splitted.size() > 1) {
       int last = splitted.size() - 1;

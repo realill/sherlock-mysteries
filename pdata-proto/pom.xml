@@ -15,7 +15,7 @@
 	</properties>
 
 	<modelVersion>4.0.0</modelVersion>
-	<version>0.9</version>
+	<version>1.0</version>
 
 	<artifactId>pdata-proto</artifactId>
 
