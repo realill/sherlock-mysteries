@@ -35,7 +35,7 @@
 		<maven.compiler.showDeprecation>true</maven.compiler.showDeprecation>
 		<archiveClasses>true</archiveClasses>
 		<objectify.version>5.1.13</objectify.version>
-		<guava.version>26.0-android</guava.version>
+		<guava.version>29.0-android</guava.version>
 		<endpoints.framework.version>2.0.0-beta.7</endpoints.framework.version>
 		<endpoints.management.version>1.0.0-beta.7</endpoints.management.version>
 
