@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import com.google.appengine.api.datastore.Entity;
 import com.google.mystery.data.DataManager;
 import com.google.mystery.data.DataUtil;
@@ -38,6 +39,12 @@ public class Case implements Serializable {
   private static final String ALTERNATIVE_NAMES = "alternativeNames";
   private static final String NAME_PROPERTY = "name";
   private static final String CASE_DATA_ID_PROPERTY = "caseDataId";
+  private static final String IMAGE_URL = "imageUrl";
+  private static final String CASE_SOURCE_URL = "caseSourceUrl";
+  private static final String AUTHOR = "author";
+  private static final String VOICE_ACTOR = "voiceActor";
+  private static final String ILLUSTRATION_ARTIST = "illustrationArtist";
+
   /** id. */
   private final String caseid;
   /** currently used data for this id. */
@@ -52,9 +59,26 @@ public class Case implements Serializable {
   private final boolean enabled;
   /** thumbnail image. */
   private final URL imageUrl;
+  /** points to spreadsheet that is source of data for the case. */
+  private final URL caseSourceUrl;
+  /** author of the case. */
+  private final String author;
 
-  public Case(String caseid, String caseDataId, String name, List<String> alternativeNames,
-      String category, boolean enabled, URL imageUrl) {
+  private final String voiceActor;
+  private final String illustrationArtist;
+
+  public Case(
+      String caseid,
+      String caseDataId,
+      String name,
+      List<String> alternativeNames,
+      String category,
+      boolean enabled,
+      URL imageUrl,
+      URL caseSourceUrl,
+      String author,
+      String voiceActor,
+      String illustrationArtist) {
     super();
     this.caseid = caseid;
     this.caseDataId = caseDataId;
@@ -63,6 +87,10 @@ public class Case implements Serializable {
     this.category = category;
     this.enabled = enabled;
     this.imageUrl = imageUrl;
+    this.caseSourceUrl = caseSourceUrl;
+    this.author = author;
+    this.voiceActor = voiceActor;
+    this.illustrationArtist = illustrationArtist;
   }
 
   public static Entity toEntity(Case mcase) {
@@ -73,26 +101,44 @@ public class Case implements Serializable {
     entity.setUnindexedProperty(CATEGORY_PROPERTY, mcase.getCategory());
     entity.setUnindexedProperty(ENABLED_PROPERTY, mcase.isEnabled());
     if (mcase.getImageUrl() != null) {
-      entity.setUnindexedProperty("imageUrl", mcase.getImageUrl().toString());
+      entity.setUnindexedProperty(IMAGE_URL, mcase.getImageUrl().toString());
     }
+    if (mcase.getCaseSourceUrl() != null) {
+      entity.setUnindexedProperty(CASE_SOURCE_URL, mcase.getCaseSourceUrl().toString());
+    }
+    entity.setUnindexedProperty(AUTHOR, mcase.getAuthor());
+    entity.setUnindexedProperty(VOICE_ACTOR, mcase.getVoiceActor());
+    entity.setUnindexedProperty(ILLUSTRATION_ARTIST, mcase.getIllustrationArtist());
     return entity;
   }
 
   public static Case fromEntity(Entity entity) {
-    URL url = null;
-    if (entity.getProperty("imageUrl") != null) {
-      try {
-        url = new URL(entity.getProperty("imageUrl").toString());
-      } catch (MalformedURLException e) {
-        Logger.getLogger(Case.class.getName()).log(Level.WARNING, "Error parsing image for case",
-            e);
+    URL imageUrl = null;
+    URL caseSourceUrl = null;
+    try {
+      if (entity.getProperty(IMAGE_URL) != null) {
+        imageUrl = new URL(entity.getProperty(IMAGE_URL).toString());
       }
+      if (entity.getProperty(CASE_SOURCE_URL) != null) {
+        caseSourceUrl = new URL(entity.getProperty(CASE_SOURCE_URL).toString());
+      }
+    } catch (MalformedURLException e) {
+      Logger.getLogger(Case.class.getName()).log(Level.WARNING, "Error parsing url for case", e);
     }
-    return new Case(entity.getKey().getName(), entity.getProperty(CASE_DATA_ID_PROPERTY).toString(),
+    return new Case(
+        entity.getKey().getName(),
+        entity.getProperty(CASE_DATA_ID_PROPERTY).toString(),
         entity.getProperty(NAME_PROPERTY).toString(),
         DataUtil.getStringList(entity, ALTERNATIVE_NAMES),
         entity.getProperty(CATEGORY_PROPERTY).toString(),
-        (Boolean) entity.getProperty(ENABLED_PROPERTY), url);
+        (Boolean) entity.getProperty(ENABLED_PROPERTY),
+        imageUrl,
+        caseSourceUrl,
+        entity.getProperty(AUTHOR) == null ? "" : entity.getProperty(AUTHOR).toString(),
+        entity.getProperty(VOICE_ACTOR) == null ? "" : entity.getProperty(VOICE_ACTOR).toString(),
+        entity.getProperty(ILLUSTRATION_ARTIST) == null
+            ? ""
+            : entity.getProperty(ILLUSTRATION_ARTIST).toString());
   }
 
   public String getCaseId() {
@@ -119,63 +165,95 @@ public class Case implements Serializable {
     return enabled;
   }
 
+  public String getAuthor() {
+    return author;
+  }
+
+  public URL getCaseSourceUrl() {
+    return caseSourceUrl;
+  }
+
+  public String getVoiceActor() {
+    return voiceActor;
+  }
+
+  public String getIllustrationArtist() {
+    return illustrationArtist;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((alternativeNames == null) ? 0 : alternativeNames.hashCode());
+    result = prime * result + ((author == null) ? 0 : author.hashCode());
     result = prime * result + ((caseDataId == null) ? 0 : caseDataId.hashCode());
+    result = prime * result + ((caseSourceUrl == null) ? 0 : caseSourceUrl.hashCode());
     result = prime * result + ((caseid == null) ? 0 : caseid.hashCode());
     result = prime * result + ((category == null) ? 0 : category.hashCode());
     result = prime * result + (enabled ? 1231 : 1237);
+    result = prime * result + ((illustrationArtist == null) ? 0 : illustrationArtist.hashCode());
+    result = prime * result + ((imageUrl == null) ? 0 : imageUrl.hashCode());
     result = prime * result + ((name == null) ? 0 : name.hashCode());
+    result = prime * result + ((voiceActor == null) ? 0 : voiceActor.hashCode());
     return result;
   }
 
   @Override
   public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
+    if (this == obj) return true;
+    if (obj == null) return false;
+    if (getClass() != obj.getClass()) return false;
     Case other = (Case) obj;
     if (alternativeNames == null) {
-      if (other.alternativeNames != null)
-        return false;
-    } else if (!alternativeNames.equals(other.alternativeNames))
-      return false;
+      if (other.alternativeNames != null) return false;
+    } else if (!alternativeNames.equals(other.alternativeNames)) return false;
+    if (author == null) {
+      if (other.author != null) return false;
+    } else if (!author.equals(other.author)) return false;
     if (caseDataId == null) {
-      if (other.caseDataId != null)
-        return false;
-    } else if (!caseDataId.equals(other.caseDataId))
-      return false;
+      if (other.caseDataId != null) return false;
+    } else if (!caseDataId.equals(other.caseDataId)) return false;
+    if (caseSourceUrl == null) {
+      if (other.caseSourceUrl != null) return false;
+    } else if (!caseSourceUrl.equals(other.caseSourceUrl)) return false;
     if (caseid == null) {
-      if (other.caseid != null)
-        return false;
-    } else if (!caseid.equals(other.caseid))
-      return false;
+      if (other.caseid != null) return false;
+    } else if (!caseid.equals(other.caseid)) return false;
     if (category == null) {
-      if (other.category != null)
-        return false;
-    } else if (!category.equals(other.category))
-      return false;
-    if (enabled != other.enabled)
-      return false;
+      if (other.category != null) return false;
+    } else if (!category.equals(other.category)) return false;
+    if (enabled != other.enabled) return false;
+    if (illustrationArtist == null) {
+      if (other.illustrationArtist != null) return false;
+    } else if (!illustrationArtist.equals(other.illustrationArtist)) return false;
+    if (imageUrl == null) {
+      if (other.imageUrl != null) return false;
+    } else if (!imageUrl.equals(other.imageUrl)) return false;
     if (name == null) {
-      if (other.name != null)
-        return false;
-    } else if (!name.equals(other.name))
-      return false;
+      if (other.name != null) return false;
+    } else if (!name.equals(other.name)) return false;
+    if (voiceActor == null) {
+      if (other.voiceActor != null) return false;
+    } else if (!voiceActor.equals(other.voiceActor)) return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "Case [caseid=" + caseid + ", caseDataId=" + caseDataId + ", name=" + name
-        + ", alternativeNames=" + alternativeNames + ", category=" + category + ", enabled="
-        + enabled + "]";
+    return "Case [caseid="
+        + caseid
+        + ", caseDataId="
+        + caseDataId
+        + ", name="
+        + name
+        + ", alternativeNames="
+        + alternativeNames
+        + ", category="
+        + category
+        + ", enabled="
+        + enabled
+        + "]";
   }
 
   public URL getImageUrl() {

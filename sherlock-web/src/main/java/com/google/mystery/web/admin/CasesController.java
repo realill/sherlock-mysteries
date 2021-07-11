@@ -25,14 +25,17 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import com.google.api.client.auth.oauth2.AuthorizationCodeRequestUrl;
 import com.google.api.client.auth.oauth2.AuthorizationCodeResponseUrl;
 import com.google.api.client.auth.oauth2.Credential;
@@ -55,17 +58,15 @@ import com.google.mystery.data.model.Story;
 public class CasesController {
   private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("-YYYYMMdd-hhmm");
   private Logger logger = Logger.getLogger(this.getClass().getName());
-  @Inject
-  private AdminManager adminManager;
-  @Inject
-  private AssetsImportManager assetsImportManager;
-  @Inject
-  private AssetsManager assetsManager;
-  @Inject
-  private GSuiteDataSource gsuiteClient;
+  @Inject private AdminManager adminManager;
+  @Inject private AssetsImportManager assetsImportManager;
+  @Inject private AssetsManager assetsManager;
+  @Inject private GSuiteDataSource gsuiteClient;
 
   @GetMapping("/admin/show-story-text")
-  public String showStoryText(Model model, @RequestParam(value = "caseDataId") String caseDataId,
+  public String showStoryText(
+      Model model,
+      @RequestParam(value = "caseDataId") String caseDataId,
       @RequestParam(value = "storyId") String storyId) {
 
     Story story = assetsManager.getStory(caseDataId, storyId);
@@ -75,8 +76,8 @@ public class CasesController {
   }
 
   @GetMapping("/admin/delete-case-data")
-  public String deleteCaseData(Model model,
-      @RequestParam(value = "caseDataId", required = true) String caseDataId) {
+  public String deleteCaseData(
+      Model model, @RequestParam(value = "caseDataId", required = true) String caseDataId) {
     try {
       adminManager.deleteCaseData(caseDataId);
     } catch (IOException e) {
@@ -87,10 +88,14 @@ public class CasesController {
   }
 
   @GetMapping("/admin/show-case-data")
-  public String showCaseData(Model model,
-      @RequestParam(value = "caseDataId", required = true) String caseDataId) {
-    List<Story> stories = assetsManager.getAllStories(caseDataId).stream()
-        .sorted((s1, s2) -> s1.getId().compareTo(s2.getId())).collect(Collectors.toList());
+  public String showCaseData(
+      Model model, @RequestParam(value = "caseDataId", required = true) String caseDataId) {
+    List<Story> stories =
+        assetsManager
+            .getAllStories(caseDataId)
+            .stream()
+            .sorted((s1, s2) -> s1.getId().compareTo(s2.getId()))
+            .collect(Collectors.toList());
     List<Clue> clues = assetsManager.getAllClues(caseDataId);
 
     model.addAttribute("caseDataId", caseDataId);
@@ -106,7 +111,9 @@ public class CasesController {
   }
 
   @GetMapping("/admin/upload-case-data")
-  public String uploadCaseData(HttpServletRequest request, Model model,
+  public String uploadCaseData(
+      HttpServletRequest request,
+      Model model,
       @RequestParam(value = "urlOrId", required = false) String spreadsheetUrlOrId,
       @RequestParam(value = "generalUrlOrId", required = false) String generalUrlOrId,
       @RequestParam(value = "caseDataId", required = false) String caseDataId) {
@@ -119,7 +126,8 @@ public class CasesController {
     try {
       String userid = UserServiceFactory.getUserService().getCurrentUser().getUserId();
       Credential credential = gsuiteClient.getAuthFlow().loadCredential(userid);
-      if (credential == null || credential.getAccessToken() == null
+      if (credential == null
+          || credential.getAccessToken() == null
           || credential.getExpiresInSeconds() < 10) {
         AuthorizationCodeRequestUrl authorizationUrl =
             gsuiteClient.getAuthFlow().newAuthorizationUrl();
@@ -147,8 +155,8 @@ public class CasesController {
     return "admin/upload-case-data";
   }
 
-  public String handleCaseDataImport(Model model, String urlOrId, String caseDataId,
-      Credential credential) throws IOException {
+  public String handleCaseDataImport(
+      Model model, String urlOrId, String caseDataId, Credential credential) throws IOException {
     List<String> errors = new ArrayList<>();
     if (caseDataId == null) {
       Map<String, String> metadata =
@@ -167,7 +175,6 @@ public class CasesController {
     adminManager.createCaseData(caseDataId);
     assetsImportManager.importCaseAssets(credential, urlOrId, caseDataId);
     return "redirect:/admin/import-log";
-
   }
 
   public String handleGeneralDataImport(String generalUrlOrId, Credential credential)
@@ -198,8 +205,12 @@ public class CasesController {
       response.getWriter().print("Missing authorization code");
     } else {
       String userid = UserServiceFactory.getUserService().getCurrentUser().getUserId();
-      TokenResponse tresponse = gsuiteClient.getAuthFlow().newTokenRequest(code)
-          .setRedirectUri(oauth2Redirect(request)).execute();
+      TokenResponse tresponse =
+          gsuiteClient
+              .getAuthFlow()
+              .newTokenRequest(code)
+              .setRedirectUri(oauth2Redirect(request))
+              .execute();
       gsuiteClient.getAuthFlow().createAndStoreCredential(tresponse, userid);
       response.sendRedirect("/admin/upload-case-data?" + responseUrl.getState());
     }
@@ -229,8 +240,8 @@ public class CasesController {
   }
 
   @GetMapping("/admin/update-case")
-  public String newCaseShowForm(Model model,
-      @RequestParam(value = "caseId", required = false) String caseId) {
+  public String newCaseShowForm(
+      Model model, @RequestParam(value = "caseId", required = false) String caseId) {
     if (caseId != null) {
       model.addAttribute("case", adminManager.getCase(caseId));
     }
@@ -255,11 +266,13 @@ public class CasesController {
   }
 
   @GetMapping("/admin/delete-case")
-  public String delete(Model model, @RequestParam(value = "caseId") String caseId,
+  public String delete(
+      Model model,
+      @RequestParam(value = "caseId") String caseId,
       @RequestParam(value = "confirm", required = false) boolean confirm) {
     if (!confirm) {
-      model.addAttribute("errors",
-          ImmutableList.of("Add &confirm=true to url to confirm deletetion"));
+      model.addAttribute(
+          "errors", ImmutableList.of("Add &confirm=true to url to confirm deletetion"));
       model.addAttribute("case", adminManager.getCase(caseId));
     } else {
       adminManager.deleteCase(caseId);
@@ -271,21 +284,37 @@ public class CasesController {
   private Case caseFromRequest(HttpServletRequest request, List<String> errors) {
     List<String> alternativeNames = ImmutableList.of();
     if (request.getParameter("alternativeNames") != null) {
-      alternativeNames = Splitter.on(",").trimResults().omitEmptyStrings()
-          .splitToList(request.getParameter("alternativeNames"));
+      alternativeNames =
+          Splitter.on(",")
+              .trimResults()
+              .omitEmptyStrings()
+              .splitToList(request.getParameter("alternativeNames"));
     }
     URL imageURL = null;
-    if (!Strings.isNullOrEmpty(request.getParameter("imageUrl"))) {
-      try {
+    URL sourceURL = null;
+    try {
+      if (!Strings.isNullOrEmpty(request.getParameter("imageUrl"))) {
         imageURL = new URL(request.getParameter("imageUrl"));
-      } catch (MalformedURLException e) {
-        errors
-            .add("Error parsing url:" + request.getParameter("imageUrl") + " : " + e.getMessage());
       }
+      if (!Strings.isNullOrEmpty(request.getParameter("caseSourceUrl"))) {
+        sourceURL = new URL(request.getParameter("caseSourceUrl"));
+      }
+    } catch (MalformedURLException e) {
+      errors.add("Error parsing url: " + e.getMessage());
     }
-    Case newCase = new Case(request.getParameter("caseId"), request.getParameter("caseDataId"),
-        request.getParameter("name"), alternativeNames, request.getParameter("category"),
-        "true".equals(request.getParameter("enabled")), imageURL);
+    Case newCase =
+        new Case(
+            request.getParameter("caseId"),
+            request.getParameter("caseDataId"),
+            request.getParameter("name"),
+            alternativeNames,
+            request.getParameter("category"),
+            "true".equals(request.getParameter("enabled")),
+            imageURL,
+            sourceURL,
+            request.getParameter("author"),
+            request.getParameter("voiceActor"),
+            request.getParameter("illustrationArtist"));
     if (Strings.isNullOrEmpty(newCase.getCaseId())) {
       errors.add("caseId can not be empty");
     }

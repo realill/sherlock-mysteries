@@ -44,7 +44,12 @@
                 <tr><td>Case Data Id</td><td><input name="caseDataId" value="${(case.caseDataId)!}"/></td></tr>
                 <tr><td>Image</td><td>
                 <#if case?? && case.imageUrl??><img src="${case.imageUrl}" alt="case image" width="200px"/><br/></#if>
-                <input name="imageUrl" value="${(case.imageUrl)!}"/>
+                <input name="imageUrl" value="${(case.imageUrl)!}" size="100"/></td></tr>
+                <tr><td>Source</td><td>
+                <input name="caseSourceUrl" value="${(case.caseSourceUrl)!}" size="100" /></td></tr>
+                <tr><td>Author</td><td><input name="author" value="${(case.author)!}"/></td></tr>
+                <tr><td>Voice Actor</td><td><input name="voiceActor" value="${(case.voiceActor)!}"/></td></tr>
+                <tr><td>Illustration Artist</td><td><input name="illustrationArtist" value="${(case.illustrationArtist)!}"/></td></tr>
                 </td></tr>
                 <tr><td>Enabled</td><td><input name="enabled" type="checkbox" value="true" <#if case?? && case.enabled>checked</#if>/></td></tr>
             </tbody>
@@ -52,6 +57,7 @@
           <button class="btn btn-sm btn-outline-secondary">Update</button>
           <#if case?? && case.caseId != "">
           <a class="btn btn-sm btn-outline-secondary" href="./delete-case?caseId=${case.caseId}">Delete Case</a>
+          <a class="btn btn-sm btn-outline-secondary" href="./export-smdata?caseId=${case.caseId}">Export PBData</a>
           </#if>
           </form>
         </main>

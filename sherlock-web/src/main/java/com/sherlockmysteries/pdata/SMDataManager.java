@@ -55,7 +55,22 @@ public class SMDataManager {
       if (c == null) {
         logWriter.println("Can not find caseid=" + caseId);
       }
+
+      // Case Data.
       CaseData.Builder caseData = CaseData.newBuilder().setCaseid(caseId).setName(c.getName());
+      if (c.getCategory() != null) {
+        caseData.setDescription(c.getCategory());
+      }
+      if (c.getAuthor() != null) {
+        caseData.setAuthor(c.getAuthor());
+      }
+      if (c.getVoiceActor() != null) {
+        caseData.setVoiceActor(c.getVoiceActor());
+      }
+      if (c.getIllustrationArtist() != null) {
+        caseData.setIllustrationArtist(c.getIllustrationArtist());
+      }
+
       caseData.addAllStreets(
           assetsManager.getStreets().stream().sorted().collect(Collectors.toList()));
       caseData.addAllLocations(

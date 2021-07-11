@@ -570,7 +570,7 @@ public class AssetsImportManager {
         if (!metadata.isEmpty()) {
           break;
         }
-      } else if (line.contains(":")) {
+      } else if (line.contains(":") && line.length() < 256) {
         List<String> split = Splitter.on(":").trimResults().splitToList(line);
         metadata.put(split.get(0).toLowerCase(), split.get(1));
       } else {

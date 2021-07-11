@@ -15,10 +15,13 @@
 package com.google.mystery.data.model;
 
 import static com.google.common.collect.ImmutableList.of;
+
 import java.net.URL;
 import java.util.Date;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import com.google.appengine.tools.development.testing.LocalDatastoreServiceTestConfig;
 import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.ImmutableList;
@@ -36,8 +39,19 @@ public class ModelTest {
 
   @Test
   public void case_writeRead() {
-    Case c = new Case("caseid", "caseDataId", "name", ImmutableList.of("an1", "an2"), "category",
-        true, null);
+    Case c =
+        new Case(
+            "caseid",
+            "caseDataId",
+            "name",
+            ImmutableList.of("an1", "an2"),
+            "category",
+            true,
+            null,
+            null,
+            "author",
+            "voiceActor",
+            "illustrationArtist");
     Case loaded = Case.fromEntity(Case.toEntity(c));
     Truth.assertThat(loaded).isEqualTo(c);
   }
@@ -51,25 +65,36 @@ public class ModelTest {
 
   @Test
   public void session_writeRead() {
-    Session s = new Session("sessionid", Session.State.CASE_STARTED, of("locationsBacklog"),
-        of("clues"), of("usedHints"), of("answers"), of(true), "followupText",
-        of(new SessionActiveSuggestion("a", 1)), "caseid");
+    Session s =
+        new Session(
+            "sessionid",
+            Session.State.CASE_STARTED,
+            of("locationsBacklog"),
+            of("clues"),
+            of("usedHints"),
+            of("answers"),
+            of(true),
+            "followupText",
+            of(new SessionActiveSuggestion("a", 1)),
+            "caseid");
     Session loaded = Session.fromEntity(Session.toEntity(s));
     Truth.assertThat(loaded).isEqualTo(s);
   }
 
   @Test
   public void clue_writeRead() throws Exception {
-    Clue clue = new Clue("caseDataId", "id", "name", "description", "keywords",
-        new URL("http://example.org"));
+    Clue clue =
+        new Clue(
+            "caseDataId", "id", "name", "description", "keywords", new URL("http://example.org"));
     Clue loaded = Clue.fromEntity(Clue.toEntity(clue));
     Truth.assertThat(loaded).isEqualTo(clue);
   }
 
   @Test
   public void hint_writeRead() throws Exception {
-    Hint hint = new Hint("caseDataId", ImmutableSet.of("precondition"), "hint", "id",
-        ImmutableList.of("sug"));
+    Hint hint =
+        new Hint(
+            "caseDataId", ImmutableSet.of("precondition"), "hint", "id", ImmutableList.of("sug"));
     Hint loaded = Hint.fromEntity(Hint.toEntity(hint));
     Truth.assertThat(loaded).isEqualTo(hint);
   }
@@ -83,8 +108,18 @@ public class ModelTest {
 
   @Test
   public void story_writeRead() throws Exception {
-    Story q = new Story("caseDataId", "id", "title", "type", "text", new URL("http://example.org"),
-        new URL("http://example.org"), ImmutableList.of("clues"), "latlong", new Date());
+    Story q =
+        new Story(
+            "caseDataId",
+            "id",
+            "title",
+            "type",
+            "text",
+            new URL("http://example.org"),
+            new URL("http://example.org"),
+            ImmutableList.of("clues"),
+            "latlong",
+            new Date());
     Story loaded = Story.fromEntity(Story.toEntity(q));
     // comparing by string because internal date can differ.
     Truth.assertThat(loaded.toString()).isEqualTo(q.toString());

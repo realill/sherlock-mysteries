@@ -20,13 +20,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.mystery.actions.messages.MessageException;
 import com.google.mystery.actions.model.SherlockResponseBuilder;
 import com.google.mystery.assets.AssetsManager;
-import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.DataManager;
 import com.google.mystery.data.model.Clue;
 import com.google.mystery.data.model.Hint;
@@ -40,29 +41,21 @@ import com.google.mystery.data.model.Story;
 /**
  * Handles player session.
  *
- * <p>
- * Current request session is initialized {@link #initSession(String)} in the beginning of the
- * request. Then all changes are happening in memory and committed into DB by
- * {@link #commitSession()};
+ * <p>Current request session is initialized {@link #initSession(String)} in the beginning of the
+ * request. Then all changes are happening in memory and committed into DB by {@link
+ * #commitSession()};
  *
- * <p>
- * {@link #getSession()} gives you current request session.
+ * <p>{@link #getSession()} gives you current request session.
  *
- * <p>
- * Not thread safe
+ * <p>Not thread safe
  *
  * @author ilyaplatonov
  */
 public class SessionManager {
-  @Inject
-  private DataManager dataManager;
+  @Inject private DataManager dataManager;
 
-  @Inject
-  private AssetsManager assetsManager;
-  @Inject
-  private SessionHolder sessionHolder;
-  @Inject
-  private SherlockConfig config;
+  @Inject private AssetsManager assetsManager;
+  @Inject private SessionHolder sessionHolder;
 
   public void initSession(String sessionid) {
     sessionHolder.initSession(getSessionOrCreate(sessionid));
@@ -99,8 +92,8 @@ public class SessionManager {
 
   /** Starts new case session */
   public void startCase(String sessionid, String caseId) {
-    sessionHolder
-        .setSession(Session.builder(sessionid).state(State.CASE_STARTED).caseid(caseId).build());
+    sessionHolder.setSession(
+        Session.builder(sessionid).state(State.CASE_STARTED).caseid(caseId).build());
     dataManager.clearSessionLog(sessionid);
   }
 
@@ -141,8 +134,9 @@ public class SessionManager {
     List<SessionActiveSuggestion> activeSuggestions =
         new ArrayList<>(session.getActiveSuggestions().size());
     for (SessionActiveSuggestion sug : session.getActiveSuggestions()) {
-      activeSuggestions.add(new SessionActiveSuggestion(sug.getSuggestion(),
-          sug.getRelevancy() > 0 ? sug.getRelevancy() - 1 : 0));
+      activeSuggestions.add(
+          new SessionActiveSuggestion(
+              sug.getSuggestion(), sug.getRelevancy() > 0 ? sug.getRelevancy() - 1 : 0));
     }
     sessionHolder.setSession(Session.builder(session).activeSuggestions(activeSuggestions).build());
   }
@@ -196,10 +190,13 @@ public class SessionManager {
   }
 
   public void pushSessionLog(Story story, SherlockResponseBuilder response) {
-    SessionLog sessionLog = new SessionLog(getSession().getSessionid(), story.getId(),
-        // list of clue ids.
-        response.getClues().stream().map(c -> c.getId()).collect(Collectors.toList()),
-        response.getHint() != null ? response.getHint().getId() : null);
+    SessionLog sessionLog =
+        new SessionLog(
+            getSession().getSessionid(),
+            story.getId(),
+            // list of clue ids.
+            response.getClues().stream().map(c -> c.getId()).collect(Collectors.toList()),
+            response.getHint() != null ? response.getHint().getId() : null);
     dataManager.pushSessionLog(sessionLog);
   }
 

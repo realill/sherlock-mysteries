@@ -15,7 +15,7 @@
 -->
 <!DOCTYPE html>
 <#import "/reusable.ftl" as p>
-<html lang="en">
+<html lang="en"> 
 
   <head>
 

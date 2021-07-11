@@ -9,4 +9,5 @@ message CaseData {
 	string author = 5;
 	string voice_actor = 6;
 	string illustration_artist = 7;
+	string description = 8;
 }

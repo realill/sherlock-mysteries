@@ -67,7 +67,8 @@ public class AdminController {
   public String exportSMData(
       @RequestParam(value = "caseId", required = true) String caseId, Model model) {
     PrintWriter writer = assetsImportManager.createWriter();
-    try (FileOutputStream tempFile = new FileOutputStream("/tmp/case.zip")) {
+    try (FileOutputStream tempFile =
+        new FileOutputStream("/tmp/case_" + caseId.replaceAll("-", "_") + ".zip")) {
       smDataManager.generateSMData(caseId, writer, tempFile);
     } catch (IOException e) {
       writer.println("Error exporting sm data:" + e.getMessage());
