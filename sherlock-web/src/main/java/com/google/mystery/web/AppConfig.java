@@ -49,7 +49,7 @@ import com.google.mystery.actions.StartCaseActions;
 import com.google.mystery.actions.SuggestionsManager;
 import com.google.mystery.actions.messages.MessagesManager;
 import com.google.mystery.assets.AdminManager;
-import com.google.mystery.assets.AssetsImportManager;
+import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.assets.DialogflowExportEntitiesManager;
 import com.google.mystery.assets.GSuiteDataSource;
@@ -178,8 +178,8 @@ public class AppConfig implements WebMvcConfigurer {
   }
 
   @Bean
-  public AssetsImportManager assetsImportManager() {
-    return new AssetsImportManager();
+  public LongOperationsManager assetsImportManager() {
+    return new LongOperationsManager();
   }
 
   @Bean

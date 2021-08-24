@@ -15,9 +15,12 @@
 package com.google.mystery.assets;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
+
 import javax.inject.Singleton;
+
 import com.google.cloud.storage.Acl;
 import com.google.cloud.storage.Acl.Role;
 import com.google.cloud.storage.Acl.User;
@@ -47,27 +50,31 @@ public class StorageManager {
 
   /**
    * Generating new audio out of given ssml.
-   * 
+   *
    * @param caseId case to generate audio for.
    * @param id id of audio file
    * @param ssml ssml to generate tts from.
    */
-  public String generateTTSAudio(String bucketName, String caseId, String id, String ssml,
-      PrintWriter writer) throws IOException {
+  public String generateTTSAudio(
+      String bucketName, String caseId, String id, String ssml, PrintWriter writer)
+      throws IOException {
     try (TextToSpeechClient textToSpeechClient = TextToSpeechClient.create()) {
       SynthesisInput input = SynthesisInput.newBuilder().setSsml(ssml).build();
       // Build the voice request
-      VoiceSelectionParams voice = VoiceSelectionParams.newBuilder().setLanguageCode("en-GB")
-          .setSsmlGender(SsmlVoiceGender.MALE).setName("en-GB-Wavenet-D").build();
+      VoiceSelectionParams voice =
+          VoiceSelectionParams.newBuilder()
+              .setLanguageCode("en-GB")
+              .setSsmlGender(SsmlVoiceGender.MALE)
+              .setName("en-GB-Wavenet-D")
+              .build();
       AudioConfig audioConfig =
           AudioConfig.newBuilder().setAudioEncoding(AudioEncoding.MP3).build();
       SynthesizeSpeechResponse response =
           textToSpeechClient.synthesizeSpeech(input, voice, audioConfig);
       writer.println(response.getAudioContent().toString());
 
-      return uploadToBucket(bucketName, response.getAudioContent(), audioPath(caseId, id));
+      return uploadMp3ToBucket(bucketName, response.getAudioContent(), audioPath(caseId, id));
     }
-
   }
 
   public String getStoryImageUrl(String bucketName, String caseId, String id) {
@@ -79,7 +86,8 @@ public class StorageManager {
     return getStoryImageUrlAndMakePublic(bucketName, caseId, id, "png");
   }
 
-  private String getStoryImageUrlAndMakePublic(String bucketName, String caseId, String id, String ext) {
+  private String getStoryImageUrlAndMakePublic(
+      String bucketName, String caseId, String id, String ext) {
     id = AssetsManager.normalizeLocation(id);
     String path = String.format("images/%s/%s.%s", caseId, id, ext);
     Storage storage = storage();
@@ -88,7 +96,8 @@ public class StorageManager {
       try {
         Blob blob = storage.get(blobId);
         makePublic(storage, blob);
-        return blob == null ? null
+        return blob == null
+            ? null
             : Utils.escapeUrl("https://storage.googleapis.com/" + bucketName + "/" + path);
       } catch (StorageException ex) {
         storageInstance = null;
@@ -98,7 +107,6 @@ public class StorageManager {
 
     return null;
   }
-
 
   private static Acl PUBLIC_ACL = Acl.of(User.ofAllUsers(), Role.READER);
 
@@ -113,7 +121,8 @@ public class StorageManager {
         Blob blob = storage.get(blobId);
 
         makePublic(storage, blob);
-        return blob == null ? null
+        return blob == null
+            ? null
             : Utils.escapeUrl("https://storage.googleapis.com/" + bucketName + "/" + path);
       } catch (StorageException ex) {
         storageInstance = null;
@@ -124,27 +133,40 @@ public class StorageManager {
     return null;
   }
 
-  /**
-   * Making blob public
-   */
+  /** Making blob public */
   protected void makePublic(Storage storage, Blob blob) {
     if (blob != null && blob.getAcl() != null && !blob.getAcl().contains(PUBLIC_ACL)) {
       storage.createAcl(blob.getBlobId(), PUBLIC_ACL);
     }
   }
 
-
   protected String audioPath(String caseId, String storyName) {
     return String.format("audio/%s/%s.mp3", caseId, storyName);
   }
 
-  protected String uploadToBucket(String bucketName, ByteString in, String name) {
+  protected String uploadMp3ToBucket(String bucketName, ByteString in, String name) {
     name = AssetsManager.normalizeLocation(name);
     Storage storage = storage();
-    BlobInfo blobInfo = storage.create(BlobInfo.newBuilder(bucketName, name)
-        // Modify access list to allow all users with link to read file
-        .setAcl(ImmutableList.of(Acl.of(User.ofAllUsers(), Role.READER)))
-        .setContentType("audio/mp3").build(), in.toByteArray());
+    BlobInfo blobInfo =
+        storage.create(
+            BlobInfo.newBuilder(bucketName, name)
+                // Modify access list to allow all users with link to read file
+                .setAcl(ImmutableList.of(Acl.of(User.ofAllUsers(), Role.READER)))
+                .setContentType("audio/mp3")
+                .build(),
+            in.toByteArray());
+    // return the public download link
+    return Utils.escapeUrl(blobInfo.getMediaLink());
+  }
+
+  public String uploadToBucket(
+      InputStream input, String bucketName, String name, String contentType) throws IOException {
+    name = AssetsManager.normalizeLocation(name);
+    Storage storage = storage();
+    @SuppressWarnings("deprecation")
+    BlobInfo blobInfo =
+        storage.create(
+            BlobInfo.newBuilder(bucketName, name).setContentType(contentType).build(), input);
     // return the public download link
     return Utils.escapeUrl(blobInfo.getMediaLink());
   }

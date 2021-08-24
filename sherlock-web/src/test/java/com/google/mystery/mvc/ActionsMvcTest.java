@@ -32,7 +32,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Truth;
 import com.google.mystery.actions.SessionManager;
-import com.google.mystery.assets.AssetsImportManager;
+import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.DataManager;
@@ -47,7 +47,7 @@ public class ActionsMvcTest {
       new LocalServiceTestHelper(
           new LocalDatastoreServiceTestConfig(), new LocalSearchServiceTestConfig());
   @Inject MysteryMvcTester tester;
-  @Inject AssetsImportManager assetsImportManager;
+  @Inject LongOperationsManager assetsImportManager;
   @Inject AssetsManager assetsManager;
   @Inject SessionManager sessionManager;
   @Inject DataManager dataManager;

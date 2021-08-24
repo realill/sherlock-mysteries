@@ -46,7 +46,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.mystery.assets.AdminManager;
-import com.google.mystery.assets.AssetsImportManager;
+import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.assets.GSuiteDataSource;
 import com.google.mystery.data.model.Case;
@@ -59,7 +59,7 @@ public class CasesController {
   private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("-YYYYMMdd-hhmm");
   private Logger logger = Logger.getLogger(this.getClass().getName());
   @Inject private AdminManager adminManager;
-  @Inject private AssetsImportManager assetsImportManager;
+  @Inject private LongOperationsManager assetsImportManager;
   @Inject private AssetsManager assetsManager;
   @Inject private GSuiteDataSource gsuiteClient;
 

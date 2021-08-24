@@ -1,6 +1,9 @@
 package com.sherlockmysteries.pdata;
 
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -28,6 +31,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.assets.SearchManager;
+import com.google.mystery.assets.StorageManager;
 import com.google.mystery.data.model.Clue;
 import com.google.mystery.data.model.DirectoryEntry;
 import com.google.mystery.data.model.Hint;
@@ -46,9 +50,30 @@ import com.sherlockmysteries.pdata.Question.QuestionData;
 public class SMDataManager {
   @Inject private AssetsManager assetsManager;
   @Inject private SearchManager searchManager;
+  @Inject private StorageManager storageManager;
   static Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
 
-  public void generateSMData(String caseId, PrintWriter logWriter, OutputStream out)
+  /** Generate smdata package and upload it to storage. */
+  public void generateAndUpload(String caseId, String bucketName, PrintWriter logWriter)
+      throws IOException {
+    String filename = "case_" + caseId.replaceAll("-", "_");
+    File tempFile = File.createTempFile(filename, ".zip");
+    try (FileOutputStream output = new FileOutputStream(tempFile)) {
+      generateSMData(caseId, logWriter, output);
+    }
+    try (FileInputStream input = new FileInputStream(tempFile)) {
+      logWriter.println("Uploading case to storage");
+      String url =
+          storageManager.uploadToBucket(
+              input, bucketName, String.format("cases/%s.zip", filename), "application/zip");
+      logWriter.println("Case is uploaded to " + url);
+    } finally {
+      tempFile.delete();
+    }
+  }
+
+  /** Generating smdata package. */
+  protected void generateSMData(String caseId, PrintWriter logWriter, OutputStream out)
       throws IOException {
     try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
       com.google.mystery.data.model.Case c = assetsManager.getCase(caseId);

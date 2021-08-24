@@ -15,20 +15,23 @@
 package com.google.mystery.assets;
 
 import java.util.concurrent.ExecutorService;
+
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.mystery.assets.cvs.CSVDataSource;
 import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.CacheManager;
 import com.google.mystery.data.DataManager;
+import com.sherlockmysteries.pdata.SMDataManager;
 
 @Configuration
 public class GeneralTestingConfig {
   @Bean
-  public AssetsImportManager assetsImportManager() {
-    return new AssetsImportManager();
+  public LongOperationsManager assetsImportManager() {
+    return new LongOperationsManager();
   }
 
   @Bean
@@ -69,5 +72,10 @@ public class GeneralTestingConfig {
   @Bean
   public CacheManager cacheManageR() {
     return new CacheManager();
+  }
+
+  @Bean
+  public SMDataManager smDataManager() {
+    return new SMDataManager();
   }
 }

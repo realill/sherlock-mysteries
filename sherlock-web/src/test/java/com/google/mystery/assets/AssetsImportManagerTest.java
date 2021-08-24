@@ -47,33 +47,33 @@ public class AssetsImportManagerTest {
 
   @Test
   public void docEntityToStory() {
-    StoryData story = AssetsImportManager.docEntityToStory(new DocEntity("header", "My content"));
+    StoryData story = LongOperationsManager.docEntityToStory(new DocEntity("header", "My content"));
     Truth.assertThat(story).isEqualTo(new StoryData(null, "header", null, null, "My content"));
 
-    story = AssetsImportManager.docEntityToStory(new DocEntity("header", "ID:myid\n\nMy content"));
+    story = LongOperationsManager.docEntityToStory(new DocEntity("header", "ID:myid\n\nMy content"));
     Truth.assertThat(story).isEqualTo(new StoryData("myid", "header", null, null, "My content"));
 
-    story = AssetsImportManager.docEntityToStory(
+    story = LongOperationsManager.docEntityToStory(
         new DocEntity("header", "ID:myid\nclues: clue1, clue2 \nLatLong: 111, 222\nMy content"));
     Truth.assertThat(story)
         .isEqualTo(new StoryData("myid", "header", "clue1, clue2", "111, 222", "My content"));
 
     story =
-        AssetsImportManager.docEntityToStory(new DocEntity("header", "\n\nID:myid\n\nMy content"));
+        LongOperationsManager.docEntityToStory(new DocEntity("header", "\n\nID:myid\n\nMy content"));
     Truth.assertThat(story).isEqualTo(new StoryData("myid", "header", null, null, "My content"));
 
-    story = AssetsImportManager.docEntityToStory(new DocEntity("header", "ID:myid\nMy content"));
+    story = LongOperationsManager.docEntityToStory(new DocEntity("header", "ID:myid\nMy content"));
     Truth.assertThat(story).isEqualTo(new StoryData("myid", "header", null, null, "My content"));
   }
 
   @Test
   public void splitWithLimit() {
-    Truth.assertThat(AssetsImportManager.splitWithLimit("123456\n123", 7)).containsExactly("123456",
+    Truth.assertThat(LongOperationsManager.splitWithLimit("123456\n123", 7)).containsExactly("123456",
         "123");
-    Truth.assertThat(AssetsImportManager.splitWithLimit("123456\n123", 20))
+    Truth.assertThat(LongOperationsManager.splitWithLimit("123456\n123", 20))
         .containsExactly("123456\n123");
 
-    Truth.assertThat(AssetsImportManager.splitWithLimit("123456\n123\n123456\n123456789", 13))
+    Truth.assertThat(LongOperationsManager.splitWithLimit("123456\n123\n123456\n123456789", 13))
         .containsExactly("123456\n123", "123456", "123456789");
   }
 }

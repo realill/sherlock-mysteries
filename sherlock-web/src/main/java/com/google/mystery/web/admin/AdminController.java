@@ -14,7 +14,6 @@
 
 package com.google.mystery.web.admin;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -36,9 +35,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.collect.ImmutableList;
 import com.google.mystery.assets.AdminManager;
-import com.google.mystery.assets.AssetsImportManager;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.assets.DialogflowExportEntitiesManager;
+import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.model.Case;
 import com.google.mystery.data.model.DirectoryEntry;
@@ -48,7 +47,7 @@ import com.sherlockmysteries.pdata.SMDataManager;
 @Controller
 public class AdminController {
   @Inject private DialogflowExportEntitiesManager apiaiExportEntitiesManager;
-  @Inject private AssetsImportManager assetsImportManager;
+  @Inject private LongOperationsManager assetsImportManager;
   @Inject private AssetsManager assetsManager;
   @Inject private AdminManager adminManager;
   @Inject private SherlockConfig config;
@@ -66,13 +65,7 @@ public class AdminController {
   @GetMapping("/admin/export-smdata")
   public String exportSMData(
       @RequestParam(value = "caseId", required = true) String caseId, Model model) {
-    PrintWriter writer = assetsImportManager.createWriter();
-    try (FileOutputStream tempFile =
-        new FileOutputStream("/tmp/case_" + caseId.replaceAll("-", "_") + ".zip")) {
-      smDataManager.generateSMData(caseId, writer, tempFile);
-    } catch (IOException e) {
-      writer.println("Error exporting sm data:" + e.getMessage());
-    }
+    assetsImportManager.exportSMData(caseId);
     return "redirect:/admin/import-log";
   }
 

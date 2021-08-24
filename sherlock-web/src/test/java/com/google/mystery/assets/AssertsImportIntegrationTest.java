@@ -46,7 +46,7 @@ public class AssertsImportIntegrationTest {
       new LocalDatastoreServiceTestConfig(), new LocalSearchServiceTestConfig());
 
   @Inject
-  AssetsImportManager assetsImportManager;
+  LongOperationsManager assetsImportManager;
 
   @Inject
   AssetsManager assetsManager;

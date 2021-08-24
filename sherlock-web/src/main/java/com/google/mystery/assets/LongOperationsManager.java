@@ -51,6 +51,7 @@ import com.google.mystery.data.model.Hint;
 import com.google.mystery.data.model.Question;
 import com.google.mystery.data.model.Story;
 import com.google.mystery.data.model.StoryData;
+import com.sherlockmysteries.pdata.SMDataManager;
 
 /**
  * Importing of case assets from google sheet logic
@@ -58,7 +59,7 @@ import com.google.mystery.data.model.StoryData;
  * @author ilyaplatonov
  */
 @Singleton
-public class AssetsImportManager {
+public class LongOperationsManager {
   private static final String STORIES_DOC_METADATA = "storiesDoc";
   @Inject private IImportDataSource client;
   @Inject private DataManager dataManager;
@@ -68,12 +69,27 @@ public class AssetsImportManager {
   @Inject private SearchManager searchManager;
   @Inject private StorageManager storageManager;
   @Inject private SherlockConfig config;
+  @Inject private SMDataManager smDataManager;
 
   private final Logger logger = Logger.getLogger(this.getClass().getName());
   private StringWriter latestWriter = new StringWriter();
 
   {
     latestWriter.write("Import never started\n");
+  }
+
+  public void exportSMData(String caseId) {
+    final PrintWriter printWriter = createWriter();
+    String bucketName = config.getBucketName();
+    executorService.submit(
+        () -> {
+          try {
+            smDataManager.generateAndUpload(caseId, bucketName, printWriter);
+          } catch (Exception e) {
+            e.printStackTrace(printWriter);
+            logger.log(Level.SEVERE, "Error running import task", e);
+          }
+        });
   }
 
   private void runImport(
@@ -301,7 +317,7 @@ public class AssetsImportManager {
                   story.getId(), story.getTitle(), story.getTitle(), story.getLatlong()));
           continue;
         }
-        if (!AssetsImportManager.checkTimesArticle(story.getId())
+        if (!LongOperationsManager.checkTimesArticle(story.getId())
             && assetsManager.checkLocation(story.getId()) == null) {
           simpleStoryIds.add(story.getId());
         }
