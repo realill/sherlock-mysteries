@@ -21,12 +21,16 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.text.WordUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +38,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.mystery.assets.AdminManager;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.assets.DialogflowExportEntitiesManager;
@@ -42,7 +48,6 @@ import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.model.Case;
 import com.google.mystery.data.model.DirectoryEntry;
 import com.google.mystery.data.model.Story;
-import com.sherlockmysteries.pdata.SMDataManager;
 
 @Controller
 public class AdminController {
@@ -51,7 +56,6 @@ public class AdminController {
   @Inject private AssetsManager assetsManager;
   @Inject private AdminManager adminManager;
   @Inject private SherlockConfig config;
-  @Inject private SMDataManager smDataManager;
 
   static List<String> CONFIG_KEYS =
       ImmutableList.of(
@@ -61,6 +65,50 @@ public class AdminController {
           SherlockConfig.DOCS_SECRET,
           SherlockConfig.FOOTER_SCRIPTS,
           SherlockConfig.DIALOGFLOW_SECRET);
+
+  private Logger logger = Logger.getLogger(this.getClass().getName());
+
+  @GetMapping("/admin/map")
+  protected String map(
+      @RequestParam(required = true) String caseDataId,
+      @RequestParam(defaultValue = "BIRDEYE") String mapType,
+      Model model)
+      throws ServletException, IOException {
+    List<Story> stories = assetsManager.getAllStories(caseDataId);
+
+    JsonArray markers = new JsonArray();
+    for (Story story : stories) {
+      try {
+        if (story.getLatlong() != null) {
+          String[] split = story.getLatlong().split(",");
+          if (split.length == 2) {
+            JsonObject marker = new JsonObject();
+            marker.addProperty("title", story.getTitle());
+            marker.addProperty("lat", Double.parseDouble(split[0].trim()));
+            marker.addProperty("long", Double.parseDouble(split[1].trim()));
+            if (Story.LOCATION.equals(story.getType())) {
+              marker.addProperty("address", WordUtils.capitalize(story.getId()));
+            }
+            marker.addProperty("id", story.getId());
+            markers.add(marker);
+          }
+        }
+      } catch (NumberFormatException e) {
+        logger.log(Level.WARNING, "Error lat/long parsing", e);
+      }
+    }
+    model.addAttribute("markers", markers);
+    if (mapType.equals("BIRDEYE")) {
+      model.addAttribute("mapUrl", "/static/map.jpg");
+      model.addAttribute("boundWidth", "1000");
+      model.addAttribute("boundHeight", "715");
+    } else {
+      model.addAttribute("mapUrl", "/static/pictorial-map.jpg");
+      model.addAttribute("boundWidth", "1024");
+      model.addAttribute("boundHeight", "515");
+    }
+    return "admin/map";
+  }
 
   @GetMapping("/admin/export-smdata")
   public String exportSMData(

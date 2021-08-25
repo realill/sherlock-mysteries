@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import com.google.appengine.api.datastore.Entity;
 import com.google.mystery.data.DataManager;
 import com.google.mystery.data.DataUtil;
+import com.sherlockmysteries.pdata.Case.MapType;
 
 /**
  * Represents active case.
@@ -44,6 +45,7 @@ public class Case implements Serializable {
   private static final String AUTHOR = "author";
   private static final String VOICE_ACTOR = "voiceActor";
   private static final String ILLUSTRATION_ARTIST = "illustrationArtist";
+  private static final String MAP_TYPE = "mapType";
 
   /** id. */
   private final String caseid;
@@ -66,6 +68,7 @@ public class Case implements Serializable {
 
   private final String voiceActor;
   private final String illustrationArtist;
+  private final MapType mapType;
 
   public Case(
       String caseid,
@@ -78,7 +81,8 @@ public class Case implements Serializable {
       URL caseSourceUrl,
       String author,
       String voiceActor,
-      String illustrationArtist) {
+      String illustrationArtist,
+      MapType mapType) {
     super();
     this.caseid = caseid;
     this.caseDataId = caseDataId;
@@ -91,6 +95,7 @@ public class Case implements Serializable {
     this.author = author;
     this.voiceActor = voiceActor;
     this.illustrationArtist = illustrationArtist;
+    this.mapType = mapType;
   }
 
   public static Entity toEntity(Case mcase) {
@@ -109,6 +114,7 @@ public class Case implements Serializable {
     entity.setUnindexedProperty(AUTHOR, mcase.getAuthor());
     entity.setUnindexedProperty(VOICE_ACTOR, mcase.getVoiceActor());
     entity.setUnindexedProperty(ILLUSTRATION_ARTIST, mcase.getIllustrationArtist());
+    entity.setUnindexedProperty(MAP_TYPE, Long.valueOf(mcase.getMapType().ordinal()));
     return entity;
   }
 
@@ -138,7 +144,14 @@ public class Case implements Serializable {
         entity.getProperty(VOICE_ACTOR) == null ? "" : entity.getProperty(VOICE_ACTOR).toString(),
         entity.getProperty(ILLUSTRATION_ARTIST) == null
             ? ""
-            : entity.getProperty(ILLUSTRATION_ARTIST).toString());
+            : entity.getProperty(ILLUSTRATION_ARTIST).toString(),
+        entity.getProperty(MAP_TYPE) == null
+            ? MapType.BIRDEYE
+            : MapType.forNumber(((Long) entity.getProperty(MAP_TYPE)).intValue()));
+  }
+
+  public MapType getMapType() {
+    return mapType;
   }
 
   public String getCaseId() {
@@ -194,6 +207,7 @@ public class Case implements Serializable {
     result = prime * result + (enabled ? 1231 : 1237);
     result = prime * result + ((illustrationArtist == null) ? 0 : illustrationArtist.hashCode());
     result = prime * result + ((imageUrl == null) ? 0 : imageUrl.hashCode());
+    result = prime * result + ((mapType == null) ? 0 : mapType.hashCode());
     result = prime * result + ((name == null) ? 0 : name.hashCode());
     result = prime * result + ((voiceActor == null) ? 0 : voiceActor.hashCode());
     return result;
@@ -230,6 +244,7 @@ public class Case implements Serializable {
     if (imageUrl == null) {
       if (other.imageUrl != null) return false;
     } else if (!imageUrl.equals(other.imageUrl)) return false;
+    if (mapType != other.mapType) return false;
     if (name == null) {
       if (other.name != null) return false;
     } else if (!name.equals(other.name)) return false;

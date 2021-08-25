@@ -28,6 +28,11 @@
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.google.mystery</groupId>
+			<artifactId>pdata-proto</artifactId>
+			<version>1.0</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/javax.annotation/javax.annotation-api -->
 		<dependency>
 			<groupId>javax.annotation</groupId>

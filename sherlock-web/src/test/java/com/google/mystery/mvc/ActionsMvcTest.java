@@ -32,12 +32,13 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.truth.Truth;
 import com.google.mystery.actions.SessionManager;
-import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.assets.AssetsManager;
+import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.DataManager;
 import com.google.mystery.data.model.Case;
 import com.google.mystery.data.model.Session;
+import com.sherlockmysteries.pdata.Case.MapType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebAppConfiguration
@@ -79,7 +80,8 @@ public class ActionsMvcTest {
               null,
               "author",
               "voiceActor",
-              "illustrationArtist"));
+              "illustrationArtist",
+              MapType.BIRDEYE));
       wasDataImported = true;
     }
     tester.restartSession();

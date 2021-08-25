@@ -27,6 +27,7 @@ import com.google.appengine.tools.development.testing.LocalServiceTestHelper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth;
+import com.sherlockmysteries.pdata.Case.MapType;
 
 public class ModelTest {
   private final LocalServiceTestHelper helper =
@@ -51,7 +52,8 @@ public class ModelTest {
             null,
             "author",
             "voiceActor",
-            "illustrationArtist");
+            "illustrationArtist",
+            MapType.BIRDEYE);
     Case loaded = Case.fromEntity(Case.toEntity(c));
     Truth.assertThat(loaded).isEqualTo(c);
   }

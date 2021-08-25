@@ -95,6 +95,7 @@ public class SMDataManager {
       if (c.getIllustrationArtist() != null) {
         caseData.setIllustrationArtist(c.getIllustrationArtist());
       }
+      caseData.setMapType(c.getMapType());
 
       caseData.addAllStreets(
           assetsManager.getStreets().stream().sorted().collect(Collectors.toList()));

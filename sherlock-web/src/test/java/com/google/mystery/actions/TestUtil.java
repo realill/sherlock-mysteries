@@ -37,6 +37,7 @@ import com.google.mystery.data.model.Clue;
 import com.google.mystery.data.model.DirectoryEntry;
 import com.google.mystery.data.model.Session;
 import com.google.mystery.data.model.Session.State;
+import com.sherlockmysteries.pdata.Case.MapType;
 import com.google.mystery.data.model.Story;
 
 public class TestUtil {
@@ -141,7 +142,8 @@ public class TestUtil {
         null,
         "author",
         "voiceActor",
-        "illustrationArtist");
+        "illustrationArtist",
+        MapType.BIRDEYE);
   }
 
   public static Clue newClue(String id) {

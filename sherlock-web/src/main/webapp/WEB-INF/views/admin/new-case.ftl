@@ -50,6 +50,12 @@
                 <tr><td>Author</td><td><input name="author" value="${(case.author)!}"/></td></tr>
                 <tr><td>Voice Actor</td><td><input name="voiceActor" value="${(case.voiceActor)!}"/></td></tr>
                 <tr><td>Illustration Artist</td><td><input name="illustrationArtist" value="${(case.illustrationArtist)!}"/></td></tr>
+                <tr><td>Map Type</td>
+                  <td>
+                  	<select name="mapType">
+                  		<option value="BIRDEYE" ${(case.mapType == "BIRDEYE")?then("selected","")}>BIRDEYE</option>
+                  		<option value="PICTORIAL"  ${(case.mapType == "PICTORIAL")?then("selected","")}>PICTORIAL</option>
+                  	</select></td></tr>
                 </td></tr>
                 <tr><td>Enabled</td><td><input name="enabled" type="checkbox" value="true" <#if case?? && case.enabled>checked</#if>/></td></tr>
             </tbody>
@@ -58,6 +64,7 @@
           <#if case?? && case.caseId != "">
           <a class="btn btn-sm btn-outline-secondary" href="./delete-case?caseId=${case.caseId}">Delete Case</a>
           <a class="btn btn-sm btn-outline-secondary" href="./export-smdata?caseId=${case.caseId}">Export PBData</a>
+          <a class="btn btn-sm btn-outline-secondary" href="./map?caseDataId=${case.caseDataId}&mapType=${case.mapType}">Map</a>
           </#if>
           </form>
         </main>

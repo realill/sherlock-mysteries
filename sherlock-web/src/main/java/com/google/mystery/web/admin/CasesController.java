@@ -46,13 +46,14 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.mystery.assets.AdminManager;
-import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.assets.AssetsManager;
 import com.google.mystery.assets.GSuiteDataSource;
+import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.data.model.Case;
 import com.google.mystery.data.model.CaseData;
 import com.google.mystery.data.model.Clue;
 import com.google.mystery.data.model.Story;
+import com.sherlockmysteries.pdata.Case.MapType;
 
 @Controller
 public class CasesController {
@@ -314,7 +315,8 @@ public class CasesController {
             sourceURL,
             request.getParameter("author"),
             request.getParameter("voiceActor"),
-            request.getParameter("illustrationArtist"));
+            request.getParameter("illustrationArtist"),
+            MapType.valueOf(request.getParameter("mapType")));
     if (Strings.isNullOrEmpty(newCase.getCaseId())) {
       errors.add("caseId can not be empty");
     }
