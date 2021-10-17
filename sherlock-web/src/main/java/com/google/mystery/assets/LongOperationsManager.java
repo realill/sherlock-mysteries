@@ -351,7 +351,7 @@ public class LongOperationsManager {
     int simpleCounter = 0;
     for (StoryData data : storyData) {
       String audioUrl =
-          voicesManager.getStoryMediaLinkAndMakePublic(bucketName, caseId, data.getId());
+          voicesManager.getStoryMediaLink(bucketName, caseId, data.getId());
       String imageUrl = voicesManager.getStoryImageUrl(bucketName, caseId, data.getId());
 
       URL audioLink = null;

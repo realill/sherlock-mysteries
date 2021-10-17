@@ -49,10 +49,9 @@ import com.google.mystery.actions.StartCaseActions;
 import com.google.mystery.actions.SuggestionsManager;
 import com.google.mystery.actions.messages.MessagesManager;
 import com.google.mystery.assets.AdminManager;
-import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.assets.AssetsManager;
-import com.google.mystery.assets.DialogflowExportEntitiesManager;
 import com.google.mystery.assets.GSuiteDataSource;
+import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.assets.SearchManager;
 import com.google.mystery.assets.StorageManager;
 import com.google.mystery.config.SherlockConfig;
@@ -66,9 +65,10 @@ import com.sherlockmysteries.pdata.SMDataManager;
 @EnableWebMvc
 @Import({
   // Admin controllers.
-  AdminController.class, CasesController.class,
+  AdminController.class,
+  CasesController.class,
   // Runtime controllers.
-  PublicController.class, WebhookControllerV2.class
+  PublicController.class
 })
 public class AppConfig implements WebMvcConfigurer {
   @Inject private CacheManager cacheManager;
@@ -99,11 +99,6 @@ public class AppConfig implements WebMvcConfigurer {
   @Bean
   public SearchManager searchManager() {
     return new SearchManager();
-  }
-
-  @Bean
-  public DFV2ResponseGenerator dfv2ResponseGenerator() {
-    return new DFV2ResponseGenerator();
   }
 
   @Bean
@@ -165,11 +160,6 @@ public class AppConfig implements WebMvcConfigurer {
   @Bean
   public GSuiteDataSource gsheetClient() {
     return new GSuiteDataSource();
-  }
-
-  @Bean
-  public DialogflowExportEntitiesManager dialogflowExportEntitiesManager() {
-    return new DialogflowExportEntitiesManager();
   }
 
   @Bean

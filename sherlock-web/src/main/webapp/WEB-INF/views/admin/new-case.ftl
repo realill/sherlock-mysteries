@@ -53,8 +53,8 @@
                 <tr><td>Map Type</td>
                   <td>
                   	<select name="mapType">
-                  		<option value="BIRDEYE" ${(case.mapType == "BIRDEYE")?then("selected","")}>BIRDEYE</option>
-                  		<option value="PICTORIAL"  ${(case.mapType == "PICTORIAL")?then("selected","")}>PICTORIAL</option>
+                  		<option value="BIRDEYE" ${(case?? && case.mapType == "BIRDEYE")?then("selected","")}>BIRDEYE</option>
+                  		<option value="PICTORIAL"  ${(case?? && case.mapType == "PICTORIAL")?then("selected","")}>PICTORIAL</option>
                   	</select></td></tr>
                 </td></tr>
                 <tr><td>Enabled</td><td><input name="enabled" type="checkbox" value="true" <#if case?? && case.enabled>checked</#if>/></td></tr>
@@ -64,7 +64,7 @@
           <#if case?? && case.caseId != "">
           <a class="btn btn-sm btn-outline-secondary" href="./delete-case?caseId=${case.caseId}">Delete Case</a>
           <a class="btn btn-sm btn-outline-secondary" href="./export-smdata?caseId=${case.caseId}">Export PBData</a>
-          <a class="btn btn-sm btn-outline-secondary" href="./map?caseDataId=${case.caseDataId}&mapType=${case.mapType}">Map</a>
+          <a class="btn btn-sm btn-outline-secondary" href="/map?caseDataId=${case.caseDataId}&mapType=${case.mapType}">Map</a>
           </#if>
           </form>
         </main>

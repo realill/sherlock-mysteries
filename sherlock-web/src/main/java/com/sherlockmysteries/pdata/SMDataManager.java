@@ -1,15 +1,13 @@
 package com.sherlockmysteries.pdata;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,7 +23,7 @@ import javax.inject.Singleton;
 
 import org.apache.commons.text.WordUtils;
 
-import com.google.api.client.repackaged.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -59,7 +57,7 @@ public class SMDataManager {
     String filename = "case_" + caseId.replaceAll("-", "_");
     File tempFile = File.createTempFile(filename, ".zip");
     try (FileOutputStream output = new FileOutputStream(tempFile)) {
-      generateSMData(caseId, logWriter, output);
+      generateSMData(caseId, bucketName, logWriter, output);
     }
     try (FileInputStream input = new FileInputStream(tempFile)) {
       logWriter.println("Uploading case to storage");
@@ -73,7 +71,8 @@ public class SMDataManager {
   }
 
   /** Generating smdata package. */
-  protected void generateSMData(String caseId, PrintWriter logWriter, OutputStream out)
+  protected void generateSMData(
+      String caseId, String bucketName, PrintWriter logWriter, OutputStream out)
       throws IOException {
     try (ZipOutputStream zipOut = new ZipOutputStream(out)) {
       com.google.mystery.data.model.Case c = assetsManager.getCase(caseId);
@@ -215,7 +214,6 @@ public class SMDataManager {
       // Writing Categories.
       zipOut.putNextEntry(new ZipEntry("directory-categories.pbdata"));
       for (DirectoryCategoryData.Builder category : categories.values()) {
-        logWriter.println("Category: " + category.toString());
         category.build().writeDelimitedTo(zipOut);
       }
 
@@ -231,7 +229,6 @@ public class SMDataManager {
                 .setScore(question.getScore())
                 .setOrder(question.getOrder())
                 .setOptional(question.getScore() <= 10);
-        logWriter.println("Question: " + questionData.toString());
         questionData.build().writeDelimitedTo(zipOut);
       }
 
@@ -240,12 +237,11 @@ public class SMDataManager {
       for (Hint hint : assetsManager.getAllHints(c.getCaseDataId())) {
         HintData.Builder hintData = HintData.newBuilder().setText(hint.getHint());
         hintData.addAllRequiredLocations(hint.getPrecondition());
-        logWriter.println("Hint: " + hintData.toString());
         hintData.build().writeDelimitedTo(zipOut);
       }
 
       // Searching for newspaper image.
-      findAndInsertNewspaper(imagesOrAudioToStore, logWriter);
+      findAndInsertNewspaper(caseId, bucketName, imagesOrAudioToStore, logWriter);
 
       // Writing Images.
       for (Entry<URL, String> imageEntry : imagesOrAudioToStore.entrySet()) {
@@ -254,47 +250,17 @@ public class SMDataManager {
     }
   }
 
-  protected void findAndInsertNewspaper(Map<URL, String> imagesOrAudio, PrintWriter logWriter) {
-    for (Entry<URL, String> imageEntry : imagesOrAudio.entrySet()) {
-      URL baseUrl = imageEntry.getKey();
-      if (baseUrl.getPath().endsWith(".png")
-          || baseUrl.getPath().endsWith(".jpg")
-          || baseUrl.getPath().endsWith(".jpeg")) {
-        // another image is found.
-        try {
-          List<String> pathElements = Arrays.asList(baseUrl.getPath().split("/"));
-          if (pathElements.size() == 0) {
-            continue;
-          }
-
-          pathElements = pathElements.subList(0, pathElements.size() - 1);
-
-          for (String newspaperName :
-              new String[] {"/newspaper.png", "/newspaper.jpg", "/newspaper.jpeg"}) {
-            URL newspaperUrl =
-                new URL(
-                    baseUrl.getProtocol(),
-                    baseUrl.getHost(),
-                    baseUrl.getPort(),
-                    Joiner.on("/").join(pathElements) + newspaperName,
-                    null);
-            HttpURLConnection huc = (HttpURLConnection) newspaperUrl.openConnection();
-            int responseCode = huc.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-              logWriter.println("Newspaper Image found at: " + newspaperUrl.toString());
-              imagesOrAudio.put(newspaperUrl, "newspaper");
-              huc.disconnect();
-              break;
-            } else {
-              huc.disconnect();
-            }
-          }
-        } catch (IOException e) {
-          e.printStackTrace(logWriter);
-        }
-
-        break;
+  protected void findAndInsertNewspaper(
+      String bucketName, String caseId, Map<URL, String> imagesOrAudio, PrintWriter logWriter) {
+    String newspaperUrl = storageManager.getStoryImageUrl(bucketName, caseId, "newspaper");
+    if (newspaperUrl != null) {
+      try {
+        imagesOrAudio.put(new URL(newspaperUrl), "newspaper");
+      } catch (MalformedURLException e) {
+        e.printStackTrace(logWriter);
       }
+    } else {
+      logWriter.println("WARN: Newspaper image not found.");
     }
   }
 
@@ -314,13 +280,7 @@ public class SMDataManager {
 
     logWriter.println("Writing: " + newName + " from " + image.toString());
     zipOut.putNextEntry(new ZipEntry(newName));
-    try (BufferedInputStream inputStream = new BufferedInputStream(image.openStream())) {
-      byte data[] = new byte[1024 * 64];
-      int byteContent;
-      while ((byteContent = inputStream.read(data, 0, 1024)) != -1) {
-        zipOut.write(data, 0, byteContent);
-      }
-    }
+    storageManager.downloadFromBucket(image.getPath(), zipOut);
   }
 
   public static String personName(String name) {

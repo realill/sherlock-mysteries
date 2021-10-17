@@ -15,8 +15,6 @@
 package com.google.mystery.web.admin;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +40,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.mystery.assets.AdminManager;
 import com.google.mystery.assets.AssetsManager;
-import com.google.mystery.assets.DialogflowExportEntitiesManager;
 import com.google.mystery.assets.LongOperationsManager;
 import com.google.mystery.config.SherlockConfig;
 import com.google.mystery.data.model.Case;
@@ -51,7 +48,6 @@ import com.google.mystery.data.model.Story;
 
 @Controller
 public class AdminController {
-  @Inject private DialogflowExportEntitiesManager apiaiExportEntitiesManager;
   @Inject private LongOperationsManager assetsImportManager;
   @Inject private AssetsManager assetsManager;
   @Inject private AdminManager adminManager;
@@ -68,7 +64,7 @@ public class AdminController {
 
   private Logger logger = Logger.getLogger(this.getClass().getName());
 
-  @GetMapping("/admin/map")
+  @GetMapping("/map")
   protected String map(
       @RequestParam(required = true) String caseDataId,
       @RequestParam(defaultValue = "BIRDEYE") String mapType,
@@ -178,28 +174,6 @@ public class AdminController {
     }
     assetsImportManager.generateAudio(caseId, stories);
     return "redirect:/admin/import-log";
-  }
-
-  @GetMapping("/admin/dialogflow")
-  public String exportEntitiesGet() {
-    return "admin/dialogflow";
-  }
-
-  @PostMapping("/admin/dialogflow")
-  public String exportEntities(
-      HttpServletRequest request,
-      Model model,
-      @RequestParam(value = "projectName", required = true) String projectName)
-      throws IOException {
-
-    if (projectName != null) {
-      StringWriter stringWriter = new StringWriter();
-      PrintWriter printWriter = new PrintWriter(stringWriter);
-      apiaiExportEntitiesManager.update(projectName, printWriter);
-      model.addAttribute("log", stringWriter.toString());
-    }
-    model.addAttribute("projectName", projectName);
-    return "admin/dialogflow";
   }
 
   @GetMapping("/admin/generate-directory")
