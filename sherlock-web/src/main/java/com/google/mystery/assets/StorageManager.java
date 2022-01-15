@@ -60,11 +60,11 @@ public class StorageManager {
       // Build the voice request
       VoiceSelectionParams voice =
           VoiceSelectionParams.newBuilder()
-              .setLanguageCode("en-GB")
-              .setName("en-GB-Wavenet-A")
+              .setLanguageCode("en-US")
+              .setName("en-US-Wavenet-D")
               .build();
       AudioConfig audioConfig =
-          AudioConfig.newBuilder().setAudioEncoding(AudioEncoding.MP3).build();
+          AudioConfig.newBuilder().setAudioEncoding(AudioEncoding.MP3).setPitch(-4).build();
       SynthesizeSpeechResponse response =
           textToSpeechClient.synthesizeSpeech(input, voice, audioConfig);
       writer.println(response.getAudioContent().toString());

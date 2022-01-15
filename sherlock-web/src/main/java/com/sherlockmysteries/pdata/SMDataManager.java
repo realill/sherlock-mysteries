@@ -241,7 +241,7 @@ public class SMDataManager {
       }
 
       // Searching for newspaper image.
-      findAndInsertNewspaper(caseId, bucketName, imagesOrAudioToStore, logWriter);
+      findAndInsertNewspaper(bucketName, caseId, imagesOrAudioToStore, logWriter);
 
       // Writing Images.
       for (Entry<URL, String> imageEntry : imagesOrAudioToStore.entrySet()) {
