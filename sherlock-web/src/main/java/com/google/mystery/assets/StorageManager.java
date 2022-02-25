@@ -156,7 +156,11 @@ public class StorageManager {
 
     String bucketName = path.split("/")[1];
 
-    Blob blob = storage.get(BlobId.of(bucketName, path.substring(bucketName.length() + 2)));
+    BlobId blobId = BlobId.of(bucketName, path.substring(bucketName.length() + 2));
+    Blob blob = storage.get(blobId);
+    if (blob == null) {
+      throw new IllegalArgumentException("can not open: " + blobId);
+    }
 
     ReadChannel reader = blob.reader();
 
